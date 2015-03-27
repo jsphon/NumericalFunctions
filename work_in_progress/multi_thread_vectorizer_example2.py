@@ -6,7 +6,7 @@ from timeit import repeat
 import numpy as np
 from numba import jit, void, double
 
-from my_numba.multi_thread_vectorizer import mvectorize
+from numba_funcs.multi_thread_vectorizer import mvectorize
 
 if __name__=='__main__':
     """ Example Usage """
@@ -154,7 +154,7 @@ if __name__=='__main__':
                          'multi-threaded 4':mf4_results,
                          'looped':lf_results,
                          'vectorized':vf_results }, index=ls )
-    import matplotlib.pyplot as plt
+    import matplotlib.pyplot as plt#
     print( 'Plotting chart')
     df.plot()
     plt.show( block=False)

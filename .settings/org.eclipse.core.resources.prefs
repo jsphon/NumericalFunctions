@@ -1,2 +1,4 @@
 eclipse.preferences.version=1
-encoding//tests/test_multi_thread_vectorizer.py=utf-8
+encoding//numba_funcs/multi_thread_vectorizer.py=utf-8
+encoding//tests/multi_thread_vectorizer_tests.py=utf-8
+encoding//work_in_progress/multi_thread_vectorizer_example2.py=utf-8
