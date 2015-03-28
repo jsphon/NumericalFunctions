@@ -15,9 +15,9 @@ class Timer:
         self.end = time.clock()
         self.interval = self.end - self.start
         if self.title:
-            print( '{1} took {0:0.3f} seconds'.format( self.interval, self.title ) )
+            print( '{1} took {0:0.4f} seconds'.format( self.interval, self.title ) )
         else:
-            print( 'Timer took {0:0.3f} seconds'.format( self.interval ) )
+            print( 'Timer took {0:0.4f} seconds'.format( self.interval ) )
             
 class AccumulatedTimer( object ):
 
