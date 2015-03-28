@@ -4,7 +4,10 @@ import numpy as np
 
 @nb.autojit
 def binary_search(alist, item):
-    """ An implementation of np.searchsorted """
+    """ An implementation of np.searchsorted
+    Currently does not return the left-most element.
+    Just returns the first one that it finds
+    """
     if alist.shape[0]==0:
         return -1
     
@@ -36,33 +39,36 @@ def quick_sort(list_):
     right       = list_.shape[0]-1
     
     i_stack_pos = 0
-    a_temp_stack = np.ndarray( ( max_depth, 2), dtype=np.int32 )
-    a_temp_stack[i_stack_pos,0] = left
-    a_temp_stack[i_stack_pos,1] = right
+    
+    a_temp_stack_left = np.ndarray( max_depth, dtype=np.int32 )
+    a_temp_stack_right = np.ndarray( max_depth, dtype=np.int32 )
+    a_temp_stack_left[ i_stack_pos ] = left
+    a_temp_stack_right[ i_stack_pos ] = right
+    
     i_stack_pos+=1
     #Main loop to pop and push items until stack is empty
 
-    return _quick_sort( list_, a_temp_stack, left, right )
+    return _quick_sort( list_, a_temp_stack_left, a_temp_stack_right, left, right )
 
 @nb.autojit( nopython=True )
-def _quick_sort( list_, a_temp_stack, left, right ):
+def _quick_sort( list_, a_temp_stack_left, a_temp_stack_right, left, right ):
     
     i_stack_pos = 1
     while i_stack_pos>0:
         
         i_stack_pos-=1
-        right = a_temp_stack[ i_stack_pos, 1 ]
-        left  = a_temp_stack[ i_stack_pos, 0 ]
+        right = a_temp_stack_right[ i_stack_pos ]
+        left  = a_temp_stack_left[ i_stack_pos ]
         
         piv = partition(list_,left,right)
         #If items in the left of the pivot push them to the stack
         if piv-1 > left:            
-            a_temp_stack[ i_stack_pos, 0 ] = left
-            a_temp_stack[ i_stack_pos, 1 ] = piv-1
+            a_temp_stack_left[ i_stack_pos ] = left
+            a_temp_stack_right[ i_stack_pos ] = piv-1
             i_stack_pos+=1
         if piv+1 < right:
-            a_temp_stack[ i_stack_pos, 0 ] = piv+1
-            a_temp_stack[ i_stack_pos, 1 ] = right
+            a_temp_stack_left[ i_stack_pos ] = piv+1
+            a_temp_stack_right[ i_stack_pos ] = right
             i_stack_pos+=1
  
 @nb.autojit( nopython=True )
