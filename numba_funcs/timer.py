@@ -22,7 +22,7 @@ class Timer:
 class AccumulatedTimer( object ):
 
     def __init__(self):
-        self.timetaken=0.0
+        self.interval=0.0
         self.call_count=0
 
     def __enter__(self):
@@ -35,4 +35,4 @@ class AccumulatedTimer( object ):
         self.call_count+=1
     
     def __repr__(self):
-        return '%0.2f seconds : %i calls'%(self.interval,self.call_count)
+        return '%0.4f seconds : %i calls'%(self.interval,self.call_count)
