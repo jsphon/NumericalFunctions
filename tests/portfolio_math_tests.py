@@ -30,40 +30,41 @@ class Test(unittest.TestCase):
         
     def test_portfolio_var_performance(self):
         
-        sizes = 2**np.arange(1,10)
+        #sizes = 2**np.arange(1,10)
+        sizes = np.array( 2**np.linspace( 1, 10, 30 ), dtype=np.int )
         
-        numba_timings = np.empty( sizes.shape[0] )
-        cython_timings = np.empty( sizes.shape[0] )
-        numpy_timings = np.empty( sizes.shape[0] )
-        num_tests = 100        
+        num_tests = 100 
+        numba_timings = np.empty( ( sizes.shape[0], num_tests ) )
+        cython_timings = np.empty( ( sizes.shape[0], num_tests ) )
+        numpy_timings = np.empty( ( sizes.shape[0], num_tests ) )
+               
         for i, dsize in enumerate( sizes ):
             cv = makeRandomCovarianceMatrix( dsize )        
             w  = np.ones( dsize, dtype=np.int ) / dsize
         
             numba_math.portfolio_var( cv, w )
-            with Timer( 'Numba' ) as numba_timer:
-                for _ in range( num_tests ):
-                    numba_result = numba_math.portfolio_var( cv, w )
-                
-            with Timer( 'Cython' ) as cython_timer:
-                for _ in range( num_tests ):
-                    cython_result = cython_math.pportfolio_var( cv, w )
-                
-            with Timer( 'Numpy' ) as numpy_timer:
-                for _ in range( num_tests ):
-                    numpy_result = numpy_math.portfolio_var( cv, w )
-                
-            np.testing.assert_array_almost_equal( numpy_result, numba_result )
-            np.testing.assert_array_almost_equal( numpy_result, cython_result )
-        
-            numba_timings[ i ] = numba_timer.interval
-            cython_timings[ i ] = cython_timer.interval
-            numpy_timings[ i ] = numpy_timer.interval
             
-        plt.plot( sizes, numba_timings, label='Numba' )
-        plt.plot( sizes, cython_timings, label='Cython')
-        plt.plot( sizes, numpy_timings, label='Numpy' )
-        plt.title( 'Square Take() Performance Test')
+            for j in range( num_tests ):
+                with Timer(  ) as numba_timer:
+                    numba_result = numba_math.portfolio_var( cv, w )
+                    
+                with Timer(  ) as cython_timer:
+                    cython_result = cython_math.pportfolio_var( cv, w )
+                    
+                with Timer(  ) as numpy_timer:
+                    numpy_result = numpy_math.portfolio_var( cv, w )
+                    
+                np.testing.assert_array_almost_equal( numpy_result, numba_result )
+                np.testing.assert_array_almost_equal( numpy_result, cython_result )
+            
+                numba_timings[ i, j ] = numba_timer.interval
+                cython_timings[ i, j ] = cython_timer.interval
+                numpy_timings[ i, j ] = numpy_timer.interval
+            
+        plt.plot( sizes, numba_timings.min( axis=1 ), label='Numba' )
+        plt.plot( sizes, cython_timings.min( axis=1 ), label='Cython')
+        plt.plot( sizes, numpy_timings.min( axis=1 ), label='Numpy' )
+        plt.title( 'Portfolio Var Performance Test')
         plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
         plt.show()
 

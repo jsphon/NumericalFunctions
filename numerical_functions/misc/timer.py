@@ -17,7 +17,8 @@ class Timer:
         if self.title:
             print( '{1} took {0:0.4f} seconds'.format( self.interval, self.title ) )
         else:
-            print( 'Timer took {0:0.4f} seconds'.format( self.interval ) )
+            pass#
+            #print( 'Timer took {0:0.4f} seconds'.format( self.interval ) )
             
 class AccumulatedTimer( object ):
 
