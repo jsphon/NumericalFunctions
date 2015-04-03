@@ -19,4 +19,19 @@ def portfolio_var( cv, weights ):
         for j in range( i+1, weights.shape[0] ):
             s2 += weights[j]*cv[i,j]
         s1+= weights[i]*s2
-    return s0+2.0*s1 
+    return s0+2.0*s1
+
+@nb.jit( nopython=True )
+def unweighted_portfolio_var( cv ):
+    """ Calculate unweighted
+    Divide by cv.shape[0]**2 to get the even weighted portfolio variance
+    """
+    s0 = 0.0
+    for i in range( cv.shape[0] ):
+        s0 += cv[i,i]
+        
+    s1 = 0.0
+    for i in range( cv.shape[0]-1 ):        
+        for j in range( i+1, cv.shape[0] ):
+            s1 += cv[i,j]        
+    return s0+2.0*s1  

@@ -34,6 +34,31 @@ cdef double cportfolio_var( double[:,:] cv,
         s1+= weights[i]*s2
     return s0+2.0*s1
 
+@cython.wraparound(False)
+@cython.nonecheck(False)
+@cython.boundscheck(False)
+def punweighted_portfolio_var( double[:,:] cv ):
+    return cunweighted_portfolio_var( cv )
+                                             
+@cython.wraparound(False)
+@cython.nonecheck(False)
+@cython.boundscheck(False)
+def cunweighted_portfolio_var( double[:,:] cv ):
+    """ Calculate unweighted
+    Divide by cv.shape[0]**2 to get the even weighted portfolio variance
+    """
+    cdef double s0=0.0
+    cdef double s1=0.0
+    cdef size_t i
+    for i in range( cv.shape[0] ):
+        s0 += cv[i,i]
+        
+    for i in range( cv.shape[0]-1 ):        
+        for j in range( i+1, cv.shape[0] ):
+            s1 += cv[i,j]        
+    return s0+2.0*s1  
+
+
 def pportfolio_s2_by_index( cv, weights, idx ):
     return cportfolio_s2_by_index( cv, weights, idx )
 

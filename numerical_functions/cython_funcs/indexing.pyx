@@ -2,6 +2,7 @@
 #cython: language_level=3, boundscheck=False, nonecheck=False, wraparound=False
 
 import cython
+
 import numpy as np
 cimport numpy as np
 
@@ -31,11 +32,25 @@ def ptake2(double[:] x, int[:] idx):
 @cython.nonecheck(False)
 @cython.boundscheck(False)
 cdef double[:] ctake2(double[:] x, int[:] idx):
-    cdef double[:] result = np.empty(idx.shape[0])    
+    cdef double[:] result = cython.view.array(shape=(idx.shape[0],), itemsize=sizeof(double), format="d")        
     cdef int i
     for i in range( idx.shape[0] ):
         result[i] = x[ idx[ i ] ]
     return result
+
+@cython.wraparound(False)
+@cython.nonecheck(False)
+@cython.boundscheck(False)
+def ptake_to_out(double[:] x, int[:] idx, double[:] out):
+    return ctake_to_out( x, idx, out )
+
+@cython.wraparound(False)
+@cython.nonecheck(False)
+@cython.boundscheck(False)
+cdef ctake_to_out(double[:] x, int[:] idx, double[:] out):            
+    cdef int i
+    for i in range( idx.shape[0] ):
+        out[i] = x[ idx[ i ] ]
 
 @cython.wraparound(False)
 @cython.nonecheck(False)

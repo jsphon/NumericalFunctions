@@ -1,5 +1,5 @@
 import pyximport; pyximport.install()
-import cython_funcs.hello as hello
+import hello as hello
 
 hello.say_hello_to('jon')
 

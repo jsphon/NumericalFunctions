@@ -16,6 +16,11 @@ def take( x, idx ):
     return r
 
 @nb.autojit
+def take_to_out( x, idx, r ):    
+    for i in range( idx.shape[0] ):
+        r[i]=x[ idx[ i ] ]
+
+@nb.autojit
 def square_take( source, idx ):
     """ Take from source, a 2d array """
     r = np.empty( ( idx.shape[0], idx.shape[0] ) )
