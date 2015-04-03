@@ -10,9 +10,11 @@ pyximport.install(setup_args={"script_args":["--compiler=mingw32"],
 
 import matplotlib.pyplot as plt
 from numerical_functions.misc.timer import Timer
+
 import numerical_functions.cython_funcs.portfolio_math as cython_math
 import numerical_functions.numba_funcs.portfolio_math as numba_math
 import numerical_functions.numpy_funcs.portfolio_math as numpy_math
+import numerical_functions.numpy_funcs.indexing as numpy_indexing
 
 from numerical_functions.tests.function_comparer import FunctionComparer
 
@@ -90,6 +92,32 @@ class Test( FunctionComparer ):
             'Numpy' : numpy_math.unweighted_portfolio_var            
        }        
         self.compare_performance( 'Unweighted Portfolio Variance', fns, _gen_random_covariance_matrix, sizes )
+        
+    def test_unweighted_portfolio_var_by_index(self):
+        cv = makeRandomCovarianceMatrix( 10 )
+        idx = np.random.random_integers( 0, 9, 5 )
+        
+        cython_var = cython_math.punweighted_portfolio_var_by_index( cv, idx )
+        numba_var = numba_math.unweighted_portfolio_var_by_index( cv, idx )
+        numpy_var = numpy_math.unweighted_portfolio_var_by_index( cv, idx )
+        
+        np.testing.assert_almost_equal( numpy_var, cython_var )
+        np.testing.assert_almost_equal( numpy_var, numba_var )
+        
+    def test_unweighted_portfolio_var_by_index_performance(self):
+        sizes = 2**np.arange( 1, 10 )
+        
+        fns = {
+            'Cython' : cython_math.punweighted_portfolio_var_by_index,
+            'Numba' : numba_math.unweighted_portfolio_var_by_index,
+            'Numpy' : numpy_math.unweighted_portfolio_var_by_index            
+       }        
+        self.compare_performance( 'Unweighted Portfolio Variance by Index', fns, _get_random_covariance_matrix_and_indices, sizes )
+       
+def _get_random_covariance_matrix_and_indices( dsize ):
+    cv = makeRandomCovarianceMatrix( dsize )
+    idx = np.random.random_integers( 0, dsize-1, dsize//2 )
+    return ( cv, idx )
 
 def _gen_random_covariance_matrix( dsize ):
     return ( makeRandomCovarianceMatrix( dsize ), )

@@ -79,7 +79,7 @@ class Test( FunctionComparer ):
         np.testing.assert_array_equal( numpy_result, numba_result )        
     
     def test_square_take_performance(self):
-        sizes = 2**np.arange( 1, 20 )
+        sizes = 2**np.arange( 1, 10 )
         
         fns = {
             'Cython' : cython_indexing.psquare_take,

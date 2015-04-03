@@ -22,7 +22,7 @@ class FunctionComparer(unittest.TestCase):
         
         for i, size in enumerate( sizes ):
             
-            print( 'Analysing size %s of %s'%(i+1, 1+len( sizes ) ) )
+            print( '%s : Analysing size %s of %s'%(title, i+1, 1+len( sizes ) ) )
         
             args = arg_gen_fn( size )
         
@@ -37,13 +37,15 @@ class FunctionComparer(unittest.TestCase):
                 result0 = results[ fn_names[0] ]
                 for fn_name in fn_names[1:]:
                     result1 = results[ fn_name ]
-                    np.testing.assert_array_almost_equal( result0, result1 )
+                    if ( result0 is not None ) and ( result1 is not None ):
+                        np.testing.assert_array_almost_equal( result0, result1 )
         
         for nm in fns:
             plt.plot( sizes, timings[ nm ].min( axis=1 ), label=nm )
         plt.title( '%s Performance Test'%title )
         plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
-        plt.show()
+        #plt.ion()
+        plt.show( block=False )
 
 
 if __name__ == "__main__":
