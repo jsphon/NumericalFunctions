@@ -1,16 +1,22 @@
 #!python
 #cython: language_level=3, boundscheck=False, nonecheck=False, wraparound=False
 
+import cython
 import numpy as np
 cimport numpy as np
 
+@cython.wraparound(False)
+@cython.nonecheck(False)
+@cython.boundscheck(False)
+def pportfolio_var( double[:,:] cv,
+                    double[:] weights ):
+    return cportfolio_var( cv, weights )
  
-cpdef double portfolio_s2_call( np.ndarray[np.float64_t,ndim=2] cv,
-                  np.ndarray[np.float64_t,ndim=1] weights):
-    return 0.0
- 
-cpdef double portfolio_s2( np.ndarray[np.float64_t,ndim=2] cv,
-                  np.ndarray[np.float64_t,ndim=1] weights):
+@cython.wraparound(False)
+@cython.nonecheck(False)
+@cython.boundscheck(False)
+cdef double cportfolio_var( double[:,:] cv,
+                  double[:] weights):
     """ Calculate portfolio variance"""
     cdef double s0=0.0
     cdef double s1=0.0
@@ -28,29 +34,10 @@ cpdef double portfolio_s2( np.ndarray[np.float64_t,ndim=2] cv,
         s1+= weights[i]*s2
     return s0+2.0*s1
 
-def portfolio_s2_opt(double[:,:] cv, double[:] weights):    
-    """ Calculate portfolio variance using memory views"""
-    cdef double s0
-    cdef double s1
-    cdef double s2
-    cdef size_t i, j
-
-    s0 = 0.0
-    for i in range( weights.shape[0] ):
-        s0 += weights[i]*weights[i]*cv[i,i]
-
-    s1 = 0.0
-    for i in range( weights.shape[0]-1 ):
-        s2 = 0.0
-        for j in range( i+1, weights.shape[0] ):
-            s2 += weights[j]*cv[i,j]
-        s1+= weights[i]*s2
-    return s0+2.0*s1
-
 def pportfolio_s2_by_index( cv, weights, idx ):
-    return portfolio_s2_by_index( cv, weights, idx )
+    return cportfolio_s2_by_index( cv, weights, idx )
 
-cdef np.float64_t portfolio_s2_by_index( 
+cdef np.float64_t cportfolio_s2_by_index( 
          np.ndarray[np.float64_t,ndim=2] cv,
          np.ndarray[np.float64_t,ndim=1] weights,
          np.ndarray[np.int64_t,ndim=1] idx ):

@@ -1,0 +1,3 @@
+LIBRARY indexing.pyd
+EXPORTS
+PyInit_indexing

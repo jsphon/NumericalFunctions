@@ -14,10 +14,10 @@ pyximport.install(setup_args={"script_args":["--compiler=mingw32"],
                               "include_dirs":np.get_include()},
                   reload_support=True)
 
-import cython_funcs.indexing as indexing
-import numba_funcs.indexing as indexing_nb
+import numerical_functions.cython_funcs.indexing as indexing
+import numerical_functions.numba_funcs.indexing as indexing_nb
 
-from numba_funcs.timer import Timer
+from numerical_functions.misc.timer import Timer
 
 class Test(unittest.TestCase):
 

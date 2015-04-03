@@ -1,28 +1,53 @@
 #!python
 #cython: language_level=3, boundscheck=False, nonecheck=False, wraparound=False
 
+import cython
 import numpy as np
 cimport numpy as np
 
-cpdef double[:] take2(double[:] x, int[:] idx):
-    cdef double[:] result = np.empty( len( idx ) )
-    cdef int i
-    for i in range( len( idx ) ):
-        result[i] = x[ idx[ i ] ]
-    return result
+@cython.wraparound(False)
+@cython.nonecheck(False)
+@cython.boundscheck(False)
+def ptake(np.ndarray[np.float64_t,ndim=1] x, np.ndarray[np.int_t, ndim=1] idx):
+    return ctake( x, idx )
 
-def take(np.ndarray[np.float64_t,ndim=1] x, np.ndarray idx):
+@cython.wraparound(False)
+@cython.nonecheck(False)
+@cython.boundscheck(False)
+cdef np.ndarray[np.float64_t,ndim=1] ctake(np.ndarray[np.float64_t,ndim=1] x, np.ndarray[np.int_t, ndim=1] idx):
     cdef np.ndarray[np.float64_t, ndim=1] result = np.empty(idx.shape[0])
     cdef int i
-    for i in range( len( idx ) ):
+    for i in range( idx.shape[0] ):
         result[i] = x[ idx[ i ] ]
     return result
 
+@cython.wraparound(False)
+@cython.nonecheck(False)
+@cython.boundscheck(False)
+def ptake2(double[:] x, int[:] idx):
+    return ctake2( x, idx )
+
+@cython.wraparound(False)
+@cython.nonecheck(False)
+@cython.boundscheck(False)
+cdef double[:] ctake2(double[:] x, int[:] idx):
+    cdef double[:] result = np.empty(idx.shape[0])    
+    cdef int i
+    for i in range( idx.shape[0] ):
+        result[i] = x[ idx[ i ] ]
+    return result
+
+@cython.wraparound(False)
+@cython.nonecheck(False)
+@cython.boundscheck(False)
 def psquare_take( 
         np.ndarray[np.float64_t,ndim=2] source,
         np.ndarray[np.int_t,ndim=1] idx ):
     return csquare_take( source, idx )
 
+@cython.wraparound(False)
+@cython.nonecheck(False)
+@cython.boundscheck(False)
 cdef np.ndarray[np.float64_t,ndim=2] csquare_take(
         np.ndarray[np.float64_t,ndim=2] source,
         np.ndarray[np.int_t,ndim=1] idx ):

@@ -1,0 +1,3 @@
+LIBRARY portfolio_math.pyd
+EXPORTS
+PyInit_portfolio_math

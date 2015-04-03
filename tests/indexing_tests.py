@@ -1,128 +1,131 @@
-'''
-Created on 27 Mar 2015
-
-@author: Jon
-'''
-
-import matplotlib.pyplot as plt
-from numba_funcs.timer import Timer
-import numba_funcs.indexing as indexing
 import numpy as np
 import unittest
 
+import pyximport
+pyximport.install(setup_args={"script_args":["--compiler=mingw32"],
+                              "include_dirs":np.get_include()},
+                  reload_support=True)
+
+import matplotlib.pyplot as plt
+from numerical_functions.misc.timer import Timer
+import numerical_functions.cython_funcs.indexing as cython_indexing
+import numerical_functions.numba_funcs.indexing as numba_indexing
+
 
 class Test(unittest.TestCase):
+    
+    def setUp(self):
+        self.sizes = 2**np.arange(1,10)        
         
     def test_take(self):
         x = np.linspace( 0, 100 )
         idx = np.random.random_integers( 0, 50, 20 )
-        result = indexing.take( x, idx )
+        
+        cython_result = cython_indexing.ptake( x, idx )
+        numba_result = numba_indexing.take( x, idx )
         expected = np.take( x, idx )
-        np.testing.assert_array_equal( expected, result )
         
-    def test_take_comparison(self):
-        x = np.arange( 1e6 )
-        idx = np.random.random_integers( 0, 1e5, 1e6 )
+        np.testing.assert_array_equal( expected, cython_result )
+        np.testing.assert_array_equal( expected, numba_result )
         
-        indexing.take( x, idx )
-        np.take( x, idx )
+    def test_take_performance(self):
         
-        with Timer( 'numba' ) as nbtimer:
-            indexing.take( x, idx )
-            
-        with Timer( 'numpy' ) as nptimer:
-            np.take( x, idx )
-           
-        ratio = nbtimer.interval / nptimer.interval
-        print( 'numba version of take took %0.2f as long as numpy'%ratio) 
+        numba_indexing.take( np.linspace( 0,1,10 ), np.array([1,2,3]))
         
-    
-    def test_square_take(self):
-
-        X = np.random.random_integers( 0, 50, 25 ).reshape( 5, 5 )
-        idx = np.arange( 0, 4, 2 )
-        result = np.empty( ( idx.shape[0], idx.shape[0] ) )
-        indexing.square_take_to_out( X, idx, result )
-        print( result )
+        sizes = 2**np.arange(1,16)
         
-        expected = X.take( idx, axis=0 ).take( idx, axis=1 )
-        print( expected )
+        numba_timings = np.empty( sizes.shape[0] )
+        cython_timings = np.empty( sizes.shape[0] )
+        cython_timings2 = np.empty( sizes.shape[0] )
+        numpy_timings = np.empty( sizes.shape[0] )
         
-        np.testing.assert_array_equal( expected, result )
-    
-    def test_square_take_to_out(self):
-        X = np.arange(25).reshape(5,5)
-        idx = np.arange( 0, 4, 2 )
-        result = np.empty( ( idx.shape[0], idx.shape[0] ) )
-        indexing.square_take_to_out( X, idx, result )
-        print( result )
+        num_tests = 100
+        for i, size in enumerate( sizes ):
+            x   = np.random.randn( size )
+            idx = np.random.random_integers( 0, size-1, size//2 )
         
-        expected = X.take( idx, axis=0 ).take( idx, axis=1 )
-        print( expected )
-        
-        np.testing.assert_array_equal( expected, result )
-        
-    def test_square_take_performance(self):
-        X = np.arange(25).reshape(5,5)
-        idx = np.arange( 0, 4, 2 )
-        result = np.empty( ( idx.shape[0], idx.shape[0] ) )
-        indexing.square_take_to_out( X, idx, result )
-        
-        result2 = indexing.square_take( X, idx )
-        
-        np.testing.assert_array_equal( result, result2 )
-
-        num_tests = 1000
-        
-        nbts = []
-        nbts2 = []
-        npts = []        
-        
-        ms = ( 10, 20, 40, 80, 160 )#, 320, 640  )
-        for m in ms:
-            X = np.arange(m*m).reshape(m,m)
-            idx = np.random.random_integers( 0, m-1, m//2 )
-            result = np.empty( ( idx.shape[0], idx.shape[0] ) )
-            with Timer( 'numba' ) as nbt:
-                for _ in range( num_tests ):
-                    indexing.square_take_to_out( X, idx, result )
-            nbts.append( nbt.interval )   
-            
-            with Timer( 'numba2' ) as nbt:
-                for _ in range( num_tests ):
-                    r=indexing.square_take( X, idx ) 
-            nbts2.append( nbt.interval ) 
-            
-            with Timer( 'numpy') as npt:
+            with Timer( 'Numba' ) as numba_timer:
                 for _ in range(num_tests):
-                    X.take( idx, axis=0 ).take( idx, axis=1 )
-            npts.append( npt.interval )   
+                    numba_result = numba_indexing.take( x, idx )
+                
+            with Timer( 'Cython' ) as cython_timer:
+                for _ in range(num_tests):
+                    cython_result = cython_indexing.ptake( x, idx )        
             
-        plt.plot( ms, nbts, label='nb to out' )
-        plt.plot( ms, nbts2, label='nb new result')
-        plt.plot( ms, npts, label='np' )
-        plt.title( 'square_take_to_out performance test')
+            with Timer( 'Cython2' ) as cython_timer2:
+                for _ in range(num_tests):
+                    cython_result2 = cython_indexing.ptake2( x, idx )        
+                
+            with Timer( 'Numpy' ) as numpy_timer:
+                for _ in range(num_tests):
+                    numpy_result = np.take( x, idx )
+                
+            np.testing.assert_array_equal( numpy_result, numba_result )
+            np.testing.assert_array_equal( numpy_result, cython_result )
+            np.testing.assert_array_equal( numpy_result, cython_result2 )
+        
+            numba_timings[ i ] = numba_timer.interval
+            cython_timings[ i ] = cython_timer.interval
+            cython_timings2[ i ] = cython_timer2.interval
+            numpy_timings[ i ] = numpy_timer.interval
+            
+        plt.plot( sizes, numba_timings, label='Numba' )
+        plt.plot( sizes, cython_timings, label='Cython')
+        plt.plot( sizes, cython_timings, label='Cython2')
+        plt.plot( sizes, numpy_timings, label='Numpy' )
+        plt.title( 'Take() Performance Test')
         plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
         plt.show()
-            
-    def test_square_and_rect_take_to_out(self):
-        
-        X = np.arange( 100 ).reshape( (10, 10 ) )
-        idx0 = np.arange( 0, 4, 2 )
-        idx1 = np.arange( 4, 6 )
-        
-        result = np.empty( ( idx0.shape[0], idx0.shape[0]+idx1.shape[0] ) )
-        af.square_and_rect_take_to_out( X, idx0, idx1, result )
-        
-        print( X )
-        print( idx0 )
-        print( idx1 )
-        print( result )
-        
-        np.testing.assert_array_equal( result[:,:2], af.square_take( X, idx0 ) )
-        r2 = np.array( [ [ 4, 5 ], [24, 25 ] ] )
-        np.testing.assert_array_equal( r2, result[:,2:])       
+               
+    def test_square_take(self):
 
+        X = np.random.randn( 5, 5 )
+        idx = np.arange( 0, 4, 2 )
+        
+        cython_result = cython_indexing.psquare_take( X, idx )
+        numba_result = numba_indexing.square_take( X, idx )
+        numpy_result = X.take( idx, axis=0 ).take( idx, axis=1 )
+        
+        np.testing.assert_array_equal( numpy_result, cython_result )
+        np.testing.assert_array_equal( numpy_result, numba_result )
+        
+    def test_square_take_performance(self):
+        
+        numba_indexing.square_take( np.random.randn(10,10), np.random.random_integers( 0, 5, 2 ) )
+    
+        sizes = 2**np.arange( 1, 8 )
+        
+        numba_timings = np.empty( sizes.shape[0] )
+        cython_timings = np.empty( sizes.shape[0] )
+        numpy_timings = np.empty( sizes.shape[0] )
+        
+        for i, size in enumerate( sizes ):
+            x   = np.random.randn( size, size )
+            idx = np.random.random_integers( 0, size-1, size//2 )
+        
+            with Timer( 'Numba' ) as numba_timer:
+                numba_result = numba_indexing.square_take( x, idx )
+                
+            with Timer( 'Cython' ) as cython_timer:
+                cython_result = cython_indexing.psquare_take( x, idx )        
+                
+            with Timer( 'Numpy' ) as numpy_timer:
+                numpy_result = x.take( idx, axis=0 ).take( idx, axis=1 )
+                
+            np.testing.assert_array_equal( numpy_result, numba_result )
+            np.testing.assert_array_equal( numpy_result, cython_result )
+        
+            numba_timings[ i ] = numba_timer.interval
+            cython_timings[ i ] = cython_timer.interval
+            numpy_timings[ i ] = numpy_timer.interval
+            
+        plt.plot( sizes, numba_timings, label='Numba' )
+        plt.plot( sizes, cython_timings, label='Cython')
+        plt.plot( sizes, numpy_timings, label='Numpy' )
+        plt.title( 'Square Take() Performance Test')
+        plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+        plt.show()
+        
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
     unittest.main()

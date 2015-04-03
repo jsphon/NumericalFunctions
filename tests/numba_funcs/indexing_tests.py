@@ -6,7 +6,7 @@ Created on 27 Mar 2015
 
 import matplotlib.pyplot as plt
 from numba_funcs.timer import Timer
-import numba_funcs.indexing as indexing
+import numerical_functions.numba_funcs.indexing as indexing
 import numpy as np
 import unittest
 
