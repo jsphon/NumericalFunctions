@@ -2,6 +2,7 @@
 #cython: language_level=3, boundscheck=False, nonecheck=False, wraparound=False
 
 import cython
+cimport cpython.array
 
 import numpy as np
 cimport numpy as np
@@ -32,7 +33,7 @@ def ptake2(double[:] x, int[:] idx):
 @cython.nonecheck(False)
 @cython.boundscheck(False)
 cdef double[:] ctake2(double[:] x, int[:] idx):
-    cdef double[:] result = cython.view.array(shape=(idx.shape[0],), itemsize=sizeof(double), format="d")        
+    cdef double[:] result = np.empty(idx.shape[0])
     cdef int i
     for i in range( idx.shape[0] ):
         result[i] = x[ idx[ i ] ]
@@ -74,3 +75,9 @@ cdef np.ndarray[np.float64_t,ndim=2] csquare_take(
         for j in range( idx.shape[0] ):
             r[ i, j ] = source[ idx[i], idx[j] ]
     return r
+
+@cython.wraparound(False)
+@cython.nonecheck(False)
+@cython.boundscheck(False)
+def pswap_row_cols( double[:, :] X, int i, int j ):
+    return cswap_row_cols( X, i, j )

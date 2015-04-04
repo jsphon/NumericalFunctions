@@ -116,7 +116,9 @@ class Test( FunctionComparer ):
        
 def _get_random_covariance_matrix_and_indices( dsize ):
     cv = makeRandomCovarianceMatrix( dsize )
-    idx = np.random.random_integers( 0, dsize-1, dsize//2 )
+    #idx = np.random.random_integers( 0, dsize-1, dsize//2 )
+    idx = np.arange( dsize )
+    np.random.shuffle( idx )
     return ( cv, idx )
 
 def _gen_random_covariance_matrix( dsize ):

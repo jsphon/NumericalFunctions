@@ -31,10 +31,11 @@ class Test( FunctionComparer ):
         np.testing.assert_array_equal( expected, numba_result )
         
     def test_take_performance(self):
-        sizes = 2**np.arange( 1, 20 )
+        sizes = 2**np.arange( 1, 12 )
         
         fns = {
             'Cython' : cython_indexing.ptake,
+            'Cython2' : cython_indexing.ptake2,
             'Numba' : numba_indexing.take,
             'Numpy' : np.take            
        }
@@ -88,6 +89,48 @@ class Test( FunctionComparer ):
        }
         
         self.compare_performance( 'Square Take', fns, _gen_square_take_args, sizes )
+        
+    def test_swap_row_cols(self):
+        X = np.random.randn( 5, 5 )
+        idx = np.array( [ 0, 2, 1, 3, 4 ] )
+        i = 1
+        j = 2
+        
+        expected = numpy_indexing.square_take( X, idx )
+        
+        cython_result = X.copy()
+        cython_indexing.pswap_row_cols( cython_result, i, j )
+        
+        numba_result = X.copy()
+        numba_indexing.swap_row_cols( numba_result, i, j )
+        
+        numpy_result = X.copy()
+        numpy_indexing.swap_row_cols( numpy_result, i, j )
+        
+        np.testing.assert_array_almost_equal( expected, numpy_result )
+        np.testing.assert_array_almost_equal( expected, numba_result )
+        np.testing.assert_array_almost_equal( expected, cython_result )
+        
+    def test_swap_row_cols_performance(self):
+        sizes = 2**np.arange( 1, 12 )
+        
+        fns = {
+            'Cython' : cython_indexing.pswap_row_cols,
+            'Numba' : numba_indexing.swap_row_cols,
+            'Numpy' : numpy_indexing.swap_row_cols            
+       }
+        
+        self.compare_performance( 'swap_row_cols', fns, _gen_swap_row_col_args, sizes )
+        
+def _gen_swap_row_col_args( msize ):
+    np.random.seed(0)
+    X   = np.arange( msize*msize, dtype=np.float ).reshape( msize, msize )
+    idx = np.arange( msize, dtype=np.int )
+    np.random.shuffle( idx )
+    i = idx[0]
+    j = idx[1]
+    return X, i, j
+         
 
 def _gen_take_to_out_args( msize ):
     x   = np.random.randn( msize )

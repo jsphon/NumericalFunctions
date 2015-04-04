@@ -12,7 +12,7 @@ from numerical_functions.misc.timer import Timer
 class FunctionComparer(unittest.TestCase):
     """ Test class for comparing function performance """
 
-    def compare_performance(self, title, fns, arg_gen_fn, sizes, num_tests=100 ):
+    def compare_performance(self, title, fns, arg_gen_fn, sizes, num_tests=100, assert_results=True, assert_args=None ):
 
         timings = {}
         for nm in fns:
@@ -22,7 +22,7 @@ class FunctionComparer(unittest.TestCase):
         
         for i, size in enumerate( sizes ):
             
-            print( '%s : Analysing size %s of %s'%(title, i+1, 1+len( sizes ) ) )
+            print( '%s : Analysing size %s of %s : %s'%(title, i+1, len( sizes ), size ) )
         
             args = arg_gen_fn( size )
         
@@ -34,18 +34,23 @@ class FunctionComparer(unittest.TestCase):
                         results[nm] = fn( *args )
                     timings[ nm ][ i, j ] = timer.interval
                     
-                result0 = results[ fn_names[0] ]
-                for fn_name in fn_names[1:]:
-                    result1 = results[ fn_name ]
-                    if ( result0 is not None ) and ( result1 is not None ):
-                        np.testing.assert_array_almost_equal( result0, result1 )
+                if assert_results:
+                    result0 = results[ fn_names[0] ]
+                    for fn_name in fn_names[1:]:
+                        result1 = results[ fn_name ]
+                        if ( result0 is not None ) and ( result1 is not None ):
+                            np.testing.assert_array_almost_equal( result0, result1 )
+                            
+                if assert_args is not None:
+                    # Do this later
+                    pass
         
         for nm in fns:
             plt.plot( sizes, timings[ nm ].min( axis=1 ), label=nm )
         plt.title( '%s Performance Test'%title )
         plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
         #plt.ion()
-        plt.show( block=False )
+        plt.show()
 
 
 if __name__ == "__main__":
