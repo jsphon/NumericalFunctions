@@ -1,7 +1,1 @@
-A free Python library for Numba Optimisations.
-
-Free for modifying and any use.
-
-Good Bye!
-
-http://blog.shvetsov.com/2013/04/using-git-with-dropbox.html
+A free Python library for numerical Python functions using Numpy, Cython and Numba.
