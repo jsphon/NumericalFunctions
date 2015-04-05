@@ -20,7 +20,7 @@ class Test( FunctionComparer ):
         self.sizes = 2**np.arange(1,10)        
         
     def test_take(self):
-        x = np.linspace( 0, 100, 100 )
+        x = np.linspace( 0, 100, 100  )
         idx = np.random.random_integers( 0, 50, 20 )
         
         cython_result = cython_indexing.ptake( x, idx )
