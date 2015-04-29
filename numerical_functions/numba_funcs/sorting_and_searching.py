@@ -5,27 +5,24 @@ import numpy as np
 @nb.autojit
 def binary_search(alist, item):
     """ An implementation of np.searchsorted
-    Currently does not return the left-most element.
-    Just returns the first one that it finds
+    Returns the left-most element
+    Algo from 
+    http://rosettacode.org/wiki/Binary_search
+    BinarySearch_Left
     """
     if alist.shape[0]==0:
         return -1
     
     first = 0
     last = len(alist)-1
-    found = False
 
-    while first<=last and not found:
+    while first<=last:
         midpoint = (first + last)//2
-        if alist[midpoint] == item:
-            return midpoint
+        if alist[midpoint] >= item:
+            last = midpoint-1
         else:
-            if item < alist[midpoint]:
-                last = midpoint-1
-            else:
-                first = midpoint+1
-
-    return -1
+            first = midpoint+1
+    return first
            
 @nb.autojit
 def quick_sort(list_):

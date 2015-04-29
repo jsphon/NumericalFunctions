@@ -5,7 +5,7 @@ Created on 27 Mar 2015
 '''
 
 import numba_funcs as nf
-from numba_funcs.timer import Timer
+from numerical_functions.misc.timer import Timer
 import numpy as np
 import unittest
 

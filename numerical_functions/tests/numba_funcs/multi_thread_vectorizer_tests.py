@@ -6,7 +6,7 @@ import numpy as np
 from numba import jit, void, double
 
 from numba_funcs.multi_thread_vectorizer import mvectorize
-from numba_funcs.timer import Timer
+from numerical_functions.misc.timer import Timer
 
 import unittest
 
