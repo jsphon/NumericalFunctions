@@ -27,6 +27,19 @@ class Test(unittest.TestCase):
                 print( 'expected=%s'%str(expected ))
             self.assertEqual( expected, r )
             
+    def test_binary_search_not_found(self):
+
+        x = np.random.random_integers( 0, 100, 10 )
+        x.sort()    
+        
+        v = -1
+        
+        r = nf.binary_search( x, v )
+        expected = np.searchsorted( x, v )
+        
+        print( 'r=%s'%r )
+        self.assertEqual( expected, r )
+            
     def test_binary_search_performance(self):
         
         x = np.random.random_integers( 0, 100000, 10000 )
