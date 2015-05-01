@@ -26,7 +26,7 @@ def bdate_range_slicer( dmin=pd.datetime(1980,1,1), dmax=pd.datetime.today()+tim
         if dr[ ld_idx ]==ld64:
             ld_idx+=1
     
-        return dr[fd_idx:ld_idx]
+        return dr[fd_idx:ld_idx].copy()
     
     return bdate_range
 
