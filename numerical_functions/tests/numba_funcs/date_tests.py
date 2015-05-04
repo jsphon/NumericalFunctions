@@ -31,6 +31,9 @@ class Test(unittest.TestCase):
         bdate_range = bdate_range_slicer()
         dr = pd.bdate_range( pd.datetime( 1990,1,1 ), pd.datetime.today() )
         
+        # JIT it
+        bdate_range( dr[0], dr[-1] )
+        
         slice_timer = AccumulatedTimer()
         pd_timer = AccumulatedTimer()
         for _ in range(100):

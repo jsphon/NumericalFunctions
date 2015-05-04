@@ -8,6 +8,8 @@ from datetime import timedelta
 import numpy as np
 import pandas as pd
 
+from numerical_functions.numba_funcs.sorting_and_searching import binary_search
+
 def bdate_range_slicer( dmin=pd.datetime(1980,1,1), dmax=pd.datetime.today()+timedelta(days=1) ):
     """ Return a bdate_range function
     that generates the range using a slice from a
@@ -22,6 +24,10 @@ def bdate_range_slicer( dmin=pd.datetime(1980,1,1), dmax=pd.datetime.today()+tim
     
         fd_idx = np.searchsorted( dr.values, fd64 )
         ld_idx = np.searchsorted( dr.values, ld64 )
+        
+        #fd_idx = binary_search( dr.values, fd64 )
+        #ld_idx = binary_search( dr.values, ld64 )
+        
         
         if dr[ ld_idx ]==ld64:
             ld_idx+=1
