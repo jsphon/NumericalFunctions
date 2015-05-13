@@ -7,6 +7,9 @@ Created on 4 May 2015
 
 import numba as nb
 import numpy as np
+
+MAX_INT = np.iinfo('i4').max
+
 @nb.jit
 def periods_since_not_null( x ):
     ''' x is a 1d array
@@ -21,7 +24,7 @@ def periods_since_not_null( x ):
 def _periods_since_not_null( x, result ):
 
     for i in range( x.shape[0] ):
-        result[i] = 0
+        result[i] = MAX_INT
         if not np.isnan( x[i] ):
             break
         
