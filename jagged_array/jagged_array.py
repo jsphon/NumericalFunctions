@@ -36,6 +36,16 @@ class JaggedArray( object ):
             # This returns a view on the array, but with different bounds
             s = slice( i.start, i.stop+1 if i.stop else None, i.step )
             return JaggedArray( self.data, self.bounds[s] )
+        elif isinstance( i, tuple ):
+            i0 = i[0]
+            i1 = i[1]
+            if isinstance( i0, slice ) and isinstance( i1, int ):
+                # slice on the first index i0, then select the i1-th element
+                s0 = self[i0]
+                result = np.array( [ row[i1] if row.shape else np.nan for row in s0 ] )
+                return result
+        else:
+            raise NotImplementedError( str( i ) )
     
     def __len__( self ):
         return len( self.bounds ) -1 
@@ -68,8 +78,8 @@ class JaggedArray( object ):
         np.save( filename+'.data', self.data )#
         np.save( filename+'.bounds',self.bounds )#{ 'data':self.data, 'bounds':self.bounds } )
         
-    def save_compressed( self, filename ):
-        np.savez_compressed( filename, data=self.data, bounds=self.bounds )
+    def save_compressed( self, f ):
+        np.savez_compressed( f, data=self.data, bounds=self.bounds )
     
     @staticmethod
     def from_list( lst, dtype=np.int ):

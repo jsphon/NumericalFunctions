@@ -58,7 +58,19 @@ class JaggedArrayTests( unittest.TestCase ):
         self.assertIsInstance( r, JaggedArray )
         self.assertEqual( 2, len(r) )
         self.assertEqual( np.array([1]), r[0] )
-        np.testing.assert_equal( np.array([2,3]),self.ja[1])
+        np.testing.assert_equal( np.array([2,3]),r[1])
+        
+    def test___getitem__slice_2d_1(self):
+        r = self.ja[:2,-1]
+        self.assertIsInstance( r, np.ndarray )
+        self.assertEqual( 2, len(r) )
+        np.testing.assert_equal( np.array([1,3]),r )
+        
+    def test___getitem__slice_2d_2(self):
+        r = self.ja[:,-1]
+        self.assertIsInstance( r, np.ndarray )
+        self.assertEqual( 4, len(r) )
+        np.testing.assert_equal( np.array([1,3,6,10]),r )
 
     def test___len__(self):
         self.assertEqual( 4, len( self.ja ) )
