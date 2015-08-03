@@ -82,3 +82,25 @@ the original array.
     	[2 3],
     ]
 
+
+You can also slice along the second axis.
+
+.. code:: python
+
+    print( ja[:,0] )
+
+
+.. parsed-literal::
+
+    [1 2 4 1]
+
+
+.. code:: python
+
+    print( ja[:,-1] )
+
+
+.. parsed-literal::
+
+    [ 1  3  6 10]
+
