@@ -37,8 +37,8 @@ def quick_sort(list_):
     
     i_stack_pos = 0
     
-    a_temp_stack_left = np.ndarray( max_depth, dtype=np.int32 )
-    a_temp_stack_right = np.ndarray( max_depth, dtype=np.int32 )
+    a_temp_stack_left = np.empty( max_depth, dtype=np.int32 )
+    a_temp_stack_right = np.empty( max_depth, dtype=np.int32 )
     a_temp_stack_left[ i_stack_pos ] = left
     a_temp_stack_right[ i_stack_pos ] = right
     
@@ -89,4 +89,77 @@ def partition(list_, left, right):
         list_[i], list_[j] = list_[j], list_[i]
     #Exchange pivot to the right position
     list_[left], list_[j] = list_[j], list_[left]
+    return j
+
+
+@nb.autojit
+def quick_arg_sort(list_):
+    """
+    Iterative version of quick sort
+    """
+    
+    max_depth = 1000
+    
+    left        = 0
+    right       = list_.shape[0]-1
+    
+    i_stack_pos = 0
+    
+    a_temp_stack_left = np.empty( max_depth, dtype=np.int32 )
+    a_temp_stack_right = np.empty( max_depth, dtype=np.int32 )
+    a_temp_stack_left[ i_stack_pos ] = left
+    a_temp_stack_right[ i_stack_pos ] = right
+    
+    i_stack_pos+=1
+    #Main loop to pop and push items until stack is empty
+
+    args = np.arange( list_.shape[0] )
+    _quick_arg_sort( list_, args, a_temp_stack_left, a_temp_stack_right, left, right )
+    return args
+
+
+@nb.autojit( nopython=True )
+def _quick_arg_sort( list_, args, a_temp_stack_left, a_temp_stack_right, left, right ):
+    
+    i_stack_pos = 1
+    while i_stack_pos>0:
+        
+        i_stack_pos-=1
+        right = a_temp_stack_right[ i_stack_pos ]
+        left  = a_temp_stack_left[ i_stack_pos ]
+        
+        piv = quick_arg_partition(list_,args,left,right)
+        #If items in the left of the pivot push them to the stack
+        if piv-1 > left:            
+            a_temp_stack_left[ i_stack_pos ] = left
+            a_temp_stack_right[ i_stack_pos ] = piv-1
+            i_stack_pos+=1
+        if piv+1 < right:
+            a_temp_stack_left[ i_stack_pos ] = piv+1
+            a_temp_stack_right[ i_stack_pos ] = right
+            i_stack_pos+=1    
+
+@nb.autojit( nopython=True )
+def quick_arg_partition( lst, arg, left, right ):
+    """
+    Partition method
+    """
+    #Pivot first element in the array
+    piv = lst[left]
+    i = left + 1
+    j = right
+
+    while True:
+        while i <= j  and lst[i] <= piv:
+            i +=1
+        while j >= i and lst[j] >= piv:
+            j -=1
+        if j <= i:
+            break
+        #Exchange items
+        lst[i], lst[j] = lst[j], lst[i]
+        arg[i], arg[j] = arg[j], arg[i]
+    #Exchange pivot to the right position
+    lst[left], lst[j] = lst[j], lst[left]
+    arg[left], arg[j] = arg[j], arg[left]
     return j

@@ -47,3 +47,30 @@ def frame_to_jagged_array( df ):
     va = JaggedArray.from_list( values )
     
     return ka, va
+
+def accumulate( keys, values ):
+    key_result = []
+    val_result = []
+    for i in range( len( keys ) ):
+        #print(i,len(price_result))
+        pr = keys[i]
+        sr = values[i]
+        if i==0:       
+            key_result.append( list( pr ) )
+            val_result.append( list( sr ) )
+
+            diffs = dict(zip(pr,sr))
+        else:        
+            for p, s in zip( *[ pr, sr ] ):
+                diffs[ p ] = diffs.get( p, 0 ) + s
+            row_keys = sorted(diffs.keys(),reverse=True)
+
+            r = [ ( k, diffs[k] ) for k in row_keys ]
+            r = [ ( k, d ) for k, d in r if d ]
+            
+            key_result.append( [ k for k, _ in r ] )
+            val_result.append( [ d for _, d in r ] )
+
+    ka = JaggedArray.from_list( key_result )
+    va = JaggedArray.from_list( val_result )
+    return ka, va
