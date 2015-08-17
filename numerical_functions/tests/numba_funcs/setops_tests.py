@@ -12,6 +12,13 @@ class Test(unittest.TestCase):
         r = mod.unique(x)
         
         print( r )
+        
+    def test_ret(self):
+        
+        x = np.array([1,2,3])
+        r = mod.ret(x)
+        
+        print(r)
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']

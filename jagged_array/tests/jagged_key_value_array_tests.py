@@ -33,6 +33,15 @@ class JaggedKeyValueArrayTests( unittest.TestCase ):
         
         self.arr = JaggedKeyValueArray( self.keys, self.vals, self.bounds )
  
+    def test_from_lists(self):
+        
+        key_list = [ self.k0, self.k1, self.k2 ]
+        val_list = [ self.v0, self.v1, self.v2 ]
+        
+        result = JaggedKeyValueArray.from_lists( key_list, val_list )
+ 
+        self.assertEqual( self.arr, result )
+ 
     def test___len__(self):
         self.assertEqual( 3, len( self.arr ) )
         
@@ -108,60 +117,69 @@ class JaggedKeyValueArrayTests( unittest.TestCase ):
         
     def test___getitem__2dslice3(self):
         
-        r = self.arr[ :2,:2 ]
-        
-        self.assertIsInstance( r, JaggedKeyValueArray )
+        r = self.arr[ :2,-2: ]
 
-        
-        
-"""
-    def test__iter__(self):
-        
-        for i, row in enumerate( self.ja ):
-            self.assertIsInstance( row, np.ndarray )
-            np.testing.assert_equal( np.array(self.ja[i]),row)
-            print(row)
-            
-    def test_save(self):
-        fn = '/tmp/ja.npz'
-        self.ja.save(fn)
-        
-    def test_load(self):
-        fn = '/tmp/ja.npz'        
-        self.ja.save(fn)
-        
-        ja2=JaggedArray.load(fn)
-        print(ja2)
-        self.assertEqual( self.ja, ja2 )
-        
-    def test_kv_to_dense(self):
-        
-        k0 = [ 1, ]
-        k1 = [ 2, 3 ]
-        k2 = [ 1, 3, 4 ]        
+        self.assertIsInstance( r, tuple )
 
-        kdata  = np.array( k0 + k1 + k2, dtype=np.int )
-        bounds = np.array( [ 0, 1, 3, 6 ] )
+        e0 = np.array( [[  0.,  11.],
+             [ 12.,  13.],
+             [ 12.,  13.]] )
+        e1 = np.array( [[  0.,  1.],
+             [ 2.,  3.],
+             [ 5.,  6.]] )
+        #print( r[1] )
+        np.testing.assert_equal( e0, r[0] )
+        np.testing.assert_equal( e1, r[1] )
+    
+    def test_to_dense(self):
         
-        v0 = [ 10 ]
-        v1 = [ 20, 30 ]
-        v2 = [ 11, 12, 13 ]
-        vdata = np.array( v0 + v1 + v2, dtype=np.int )
+        data, cols = self.arr.to_dense()
+        print( data )
+        print( cols )
         
-        r = mod.kv_to_dense( kdata, vdata, bounds )
-        print( r )
+    def test_to_dense2(self):
+        keys = [ [ 0 ], [ 1, 2, 3 ], [2, 3 ] ]
+        values = [ [ 10 ], [ 21, 22, 23 ], [ 32, 33 ] ]
         
-        print( 'cumsum...' )
-        print( np.cumsum( r[0] ) )
+        arr = JaggedKeyValueArray.from_lists( keys, values )
         
-        expected0 = [ [ 10, 0, 0, 0 ],
-                      [ 0, 20, 30, 0 ],
-                      [ 11, 0, 12, 13 ] ]
-        expected0 = np.array( expected0 )
+        data, cols = arr.to_dense()
+        print( data )
+        print( cols )
         
-        expected1 = np.array( [ 1,2,3,4 ])
+    def test_from_dense(self):
+        data = [ [ 0, 1, 2 ], 
+                 [ 3, 0, 4 ],
+                 [ 0, 5, 0 ] ]
+        cols = [ 10, 20, 30 ]
         
-        np.testing.assert_equal( expected0, r[0] )
-        np.testing.assert_equal( expected1, r[1] )
-
-"""
+        data = np.array(data)
+        cols = np.array(cols)
+        r = JaggedKeyValueArray.from_dense(data, cols )
+        print(r)
+        
+        e0 = np.array( [ 1, 2, 3, 4, 5 ] )
+        e1 = np.array( [ 20, 30, 10, 30, 20 ] )
+        e2 = np.array( [ 0, 2, 4, 5 ] )
+        np.testing.assert_array_equal( e0, r.values )
+        np.testing.assert_array_equal( e1, r.keys )
+        np.testing.assert_array_equal( e2, r.bounds )
+        
+    def test_from_dense_nb(self):
+        data = [ [ 0, 1, 2 ], 
+                 [ 3, 0, 4 ],
+                 [ 0, 5, 0 ] ]
+        cols = [ 10, 20, 30 ]
+        
+        data = np.array(data)
+        cols = np.array(cols)
+        r = JaggedKeyValueArray.from_dense_nb(data, cols )
+        print(r)
+        
+        e0 = np.array( [ 1, 2, 3, 4, 5 ] )
+        e1 = np.array( [ 20, 30, 10, 30, 20 ] )
+        e2 = np.array( [ 0, 2, 4, 5 ] )
+        np.testing.assert_array_equal( e0, r.values )
+        np.testing.assert_array_equal( e1, r.keys )
+        np.testing.assert_array_equal( e2, r.bounds )
+        

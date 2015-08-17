@@ -6,6 +6,19 @@ import numpy as np
 import numba as nb
 from numba_funcs.sorting_and_searching import quick_sort
 
+
+@nb.jit( nopython=True )
+def ret( x, y=True ):
+    z = np.empty(0, np.bool_)
+    r =(z,)
+    
+    if y:
+        r = ( x, z )
+    else:
+        r = ( x, )
+
+    return r
+
 @nb.jit( nopython=True )
 def unique(ar, return_index=False, return_inverse=False, return_counts=False):
     """
@@ -91,9 +104,9 @@ def unique(ar, return_index=False, return_inverse=False, return_counts=False):
         else:
             ret = (ar,)
             if return_index:
-                ret += (np.empty(0, np.bool_),)
+                ret += (np.empty(0, np.int8),)
             if return_inverse:
-                ret += (np.empty(0, np.bool_),)
+                ret += (np.empty(0, np.int8),)
             if return_counts:
                 ret += (np.empty(0, np.intp),)
         return ret

@@ -12,6 +12,7 @@ INT_TYPES = ( int, np.int, np.int64 )
 
 class JaggedKeyValueArray( object ):
     
+    @nb.jit
     def __init__( self, keys, values, bounds, dtype=np.int ):
         
         if isinstance( keys, np.ndarray ):
@@ -29,6 +30,50 @@ class JaggedKeyValueArray( object ):
         else:
             self.bounds = np.array( bounds, dtype=np.int )
             
+    @staticmethod
+    def from_lists( key_list, val_list, dtype=np.int ):
+        """ Make a JaggedKeyValueArray from key and value list of lists
+        """
+        assert len( key_list )==len( val_list )
+        
+        bounds    = np.ndarray( len( key_list )+1, dtype=np.int )
+        bounds[0] = 0
+        c = 0
+        for i, x in enumerate( key_list ):
+            c+=len(x)
+            bounds[i+1]=c
+        
+        key_list = [ x for item in key_list for x in item ]
+        val_list = [ x for item in val_list for x in item ]
+        return JaggedKeyValueArray( key_list, val_list, bounds )
+    
+    @staticmethod
+    @nb.jit
+    def from_dense_nb( data, cols ):#, dtype=np.int ):
+        """ Make a JaggedKeyValueArray from a dense array """    
+        keys, values, bounds=_from_dense_nb( data, cols )#, dtype)
+        n = bounds[-1]
+        return JaggedKeyValueArray( keys[:n], values[:n], bounds )
+
+    @staticmethod
+    def from_dense( data, cols, dtype=np.int ):
+        """ Make a JaggedKeyValueArray from a dense array """
+    
+        keys = []
+        values = []
+        bounds = []
+        for i in range( len( data ) ):
+            row = data[ i ]
+            mask = ( row!=0 )
+            row_vals = row.compress( mask )
+            row_cols = cols.compress( mask )
+            
+            keys.append( row_cols )
+            values.append( row_vals )
+            bounds.append( len( row_cols ) )
+        
+        return JaggedKeyValueArray.from_lists( keys, values )
+    
     def __len__(self):
         return self.bounds.shape[0]-1
             
@@ -38,9 +83,14 @@ class JaggedKeyValueArray( object ):
             return False
         if len( self )!=len( other ):
             return False
-        for i in range( len( self ) ):
-            if not np.all( self[i]==other[i] ):
-                return False
+        
+        if not np.array_equal( self.bounds, other.bounds ):
+            return False
+        if not np.array_equal( self.keys, other.keys ):
+            return False
+        if not np.array_equal( self.values, other.values ):
+            return False
+
         return True
     
     def __getitem__( self, i ):
@@ -64,6 +114,37 @@ class JaggedKeyValueArray( object ):
                     j1 = self.bounds[i0+1]
                     return ( self.keys[j0:j1][i1], self.values[j0:j1][i1] )
         
+            if isinstance( i0, slice ):
+                row_start = i0.start or 0
+                row_end   = i0.stop or len( self )
+                if isinstance( i1, slice ):
+                    # Return fixed size arrays for the keys and values
+                    assert i1.step is None, 'Only step 1 supported, step is %s'%i1.step
+                    assert (i1.start is None) or (i1.stop is None) 
+                    
+                    if i1.start:
+                        start = i1.start
+                        assert start<0
+                        size = -start
+                        key_result = np.zeros( ( len( self ), size ) )
+                        val_result = np.zeros( ( len( self ), size ) )
+                        
+                        ii=0
+                        for row in range( row_start, row_end+1 ):
+                            row_key, row_val = self[row]
+                            rk = row_key[start:]
+                            key_result[ii, start:]=rk
+                            if rk.shape[0]<size:
+                                key_result[ii,:size-rk.shape[0]]=0
+                            rv = row_val[start:]
+                            val_result[ii, start:]=rv
+                            if rv.shape[0]<size:
+                                val_result[ii,:size-rv.shape[0]]=0
+                                
+                            ii+=1
+                        
+                        return key_result, val_result
+                               
         raise Exception( 'Not implemented for slice %s'%str(i))
     def __repr__( self ):
         
@@ -82,18 +163,16 @@ class JaggedKeyValueArray( object ):
     def get_values_array(self):
         """ Return a jagged array of values """
         return JaggedArray( self.values, self.bounds )
+
+    def to_dense( self, default_value=0 ):
     
+        unique_keys, inverse_data = np.unique( self.keys, return_inverse=True)
         
-    
-    
-def kv_to_dense( key_data, val_data, bounds, default_value=0 ):
+        data = _kv_to_dense( self.keys, self.values, self.bounds, unique_keys, inverse_data, default_value )
+        
+        return data, unique_keys
 
-    unique_keys, inverse_data = np.unique( key_data, return_inverse=True)
     
-    data = _kv_to_dense( key_data, val_data, bounds, unique_keys, inverse_data, default_value )
-    
-    return data, unique_keys
-
 @nb.jit( nopython=True )
 def _kv_to_dense( key_data, val_data, bounds, unique_keys, inverse_data, default_value ):
     
@@ -106,21 +185,23 @@ def _kv_to_dense( key_data, val_data, bounds, unique_keys, inverse_data, default
             col_idx            = inverse_data[ i0+j ]
             data[ i, col_idx ] = val_data[ i0 + j ]
     
-    return data 
+    return data  
 
-def dense_to_kv( data, cols ):
-    
-    keys = []
-    values = []
-    for i in range( len( data ) ):
+@nb.jit( nopython=True )
+def _from_dense_nb( data, cols):#, dtype=np.int ):
+    """ Make the params for from_dense_nb """
+    l = data.size
+    keys   = np.empty( l, cols.dtype )
+    values = np.empty( l, data.dtype )
+    bounds = np.empty( data.shape[0]+1, np.int_ )
+    bounds[0] = 0
+    c = 0
+    for i in range( data.shape[0] ):
         row = data[ i ]
-        mask = ( row!=0 )
-        #print(mask)
-        row_vals = row.compress( mask )
-        row_cols = cols.compress( mask )
-        
-        keys.append( row_cols )
-        values.append( row_vals )
-        
-    ka = JaggedArray.from_list( keys )
-    va = JaggedArray.from_list( values )
+        for j in range( data.shape[1] ):
+            if row[ j ]:
+                keys[ c ] = cols[ j ]
+                values[ c ] = row[ j ]
+                c+=1
+        bounds[ i+1 ]=c
+    return keys, values, bounds
