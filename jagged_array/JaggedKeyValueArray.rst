@@ -33,6 +33,51 @@ iteration, over rows, of the non-zero values.
 
 
 
+An example of array access:
+
+.. code:: python
+
+    print( 'arr[0]: %s'%str(arr[0]))
+
+
+.. parsed-literal::
+
+    arr[0]: (array([1]), array([10]))
+
+
+An example of array slicing:
+
+.. code:: python
+
+    arr[:2]
+
+
+
+
+.. parsed-literal::
+
+    [
+    	(array([1]), array([10])),
+    	(array([1, 2, 3]), array([21, 22, 23])),
+    ]
+
+
+
+An example of iterating over the array:
+
+.. code:: python
+
+    for row_keys, row_vals in arr:
+        print( 'keys: %s, values: %s'%( row_keys, row_vals  ) )
+
+
+.. parsed-literal::
+
+    keys: [1], values: [10]
+    keys: [1 2 3], values: [21 22 23]
+    keys: [2 3], values: [32 33]
+
+
 .. code:: python
 
     data, cols = arr.to_dense()
