@@ -33,6 +33,20 @@ class JaggedKeyValueArrayTests( unittest.TestCase ):
         
         self.arr = JaggedKeyValueArray( self.keys, self.vals, self.bounds )
  
+    def test_cumsum(self):
+        
+        dense, cols = self.arr.to_dense()
+        cs          = dense.cumsum( axis=0 )
+        e           = JaggedKeyValueArray.from_dense( cs, cols)
+        
+        print(e)
+        r = self.arr.cumsum()
+        
+        np.testing.assert_array_equal( e.bounds, r.bounds )
+        np.testing.assert_array_equal( e.keys, r.keys )
+        np.testing.assert_array_equal( e.values, r.values )
+
+ 
     def test_from_lists(self):
         
         key_list = [ self.k0, self.k1, self.k2 ]

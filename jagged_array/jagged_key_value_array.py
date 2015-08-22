@@ -171,7 +171,37 @@ class JaggedKeyValueArray( object ):
         data = _kv_to_dense( self.keys, self.values, self.bounds, unique_keys, inverse_data, default_value )
         
         return data, unique_keys
-
+    
+    def cumsum(self):
+        unique_keys, inverse_data = np.unique( self.keys, return_inverse=True)
+        
+        cs_keys, cs_vals, cs_bounds = _cumsum(self.keys, self.values, self.bounds, unique_keys, inverse_data)
+        return JaggedKeyValueArray( cs_keys, cs_vals, cs_bounds )
+        
+@nb.jit( nopython=True )
+def _cumsum( keys, values, bounds, unique_keys, inverse_data ):
+    buffer = np.zeros_like( unique_keys, np.int_ )
+    max_possible_length = ( bounds.shape[0]-1 ) * unique_keys.shape[0]
+    cs_keys = np.empty( max_possible_length, dtype=keys.dtype )
+    cs_vals = np.empty( max_possible_length, dtype=values.dtype )
+    cs_bounds = np.empty_like( bounds )
+    cs_bounds[0] = 0
+    pos = 0
+    for i in range( bounds.shape[0]-1 ):
+        i0 = bounds[i]
+        i1 = bounds[i+1]
+        for j in range( i0, i1 ):
+            bcol = inverse_data[j]
+            buffer[ bcol ] += values[ j ]
+            
+        for j in range( unique_keys.shape[0] ):
+            if buffer[ j ]:
+                cs_vals[ pos ] = buffer[ j ]
+                cs_keys[ pos ] = unique_keys[ j ]
+                pos+=1
+        cs_bounds[i+1]=pos
+            
+    return cs_keys[:pos].copy(), cs_vals[:pos].copy(), cs_bounds
     
 @nb.jit( nopython=True )
 def _kv_to_dense( key_data, val_data, bounds, unique_keys, inverse_data, default_value ):
