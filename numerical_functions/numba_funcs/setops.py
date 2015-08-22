@@ -20,6 +20,69 @@ def ret( x, y=True ):
     return r
 
 @nb.jit( nopython=True )
+def unique_idx(ar):
+    """ Return the unique values of ar, along with the index """
+
+    ar = ar.copy()
+    sorted_args = sas.quick_arg_sort( ar )
+
+    changes = np.empty_like( ar, dtype=np.int_)
+    changes[0] = 0
+    pos = 1
+    for i in range( 1, ar.shape[0] ):
+        if ar[i]!=ar[i-1]:  
+            changes[ pos ] = i          
+            pos+=1
+   
+    inv_idx = np.empty( pos, dtype=np.intp)
+    unq_val = np.empty( pos, dtype=ar.dtype)
+    
+    inv_idx[ 0 ] = sorted_args[0]
+    unq_val[ 0 ] = ar[0]
+    
+    for i in range( 1, np.int32( pos ) ):
+        j = changes[ i ]
+        inv_idx[ i ] = sorted_args[ j ]
+        unq_val[ i ] = ar[ j ]
+    
+    return unq_val, inv_idx
+
+@nb.jit( nopython=True )
+def unique_inv(ar):
+    """ Return the unique values of ar, along with the inverse """
+
+    ar = ar.copy()
+    sorted_args = sas.quick_arg_sort( ar )
+
+    changes = np.empty_like( ar, dtype=np.int_)
+    changes[0] = 0
+    flag    = np.empty_like( ar, dtype=np.bool_)
+    flag[:] = False
+    pos = 1
+    for i in range( 1, ar.shape[0] ):
+        if ar[i]!=ar[i-1]:  
+            changes[ pos ] = i          
+            pos+=1
+            flag[i]=True
+            
+    iflag = np.empty( ar.shape, dtype=np.intp )
+    iflag[0] = 0 
+    for i in range( 1, flag.shape[0] ):
+        iflag[i] = iflag[i-1]+flag[i]
+        
+    inv_idx = np.empty(ar.shape, dtype=np.intp)
+    for i in range( ar.shape[0] ):
+        inv_idx[ sorted_args[ i ] ] = iflag[ i ]
+
+    unq_val = np.empty( pos, dtype=ar.dtype)
+    unq_val[ 0 ] = ar[0]    
+    for i in range( 1, np.int32( pos ) ):
+        j = changes[ i ]
+        unq_val[ i ] = ar[ j ]
+    
+    return unq_val, inv_idx
+
+@nb.jit( nopython=True )
 def unique(ar, return_index=False, return_inverse=False, return_counts=False):
     """
     Find the unique elements of an array.

@@ -5,6 +5,7 @@ Created on 27 Mar 2015
 '''
 
 import numerical_functions.numba_funcs as nf
+import numerical_functions.numba_funcs.sorting_and_searching as sas
 from numerical_functions.misc.timer import Timer
 import numpy as np
 import unittest
@@ -108,3 +109,141 @@ class Test(unittest.TestCase):
         
         np.testing.assert_array_equal( [ 1, 2, 3, 4], x )
         np.testing.assert_array_equal( [ 2, 0, 1, 3 ], arg )
+        
+    def test__merge1(self):
+        
+        x = np.array( [ 1, 3, 2, 4 ] )
+        
+        y = np.empty_like( x )
+        sas._merge( x, y, 0, 2, 4 )
+        
+        e = np.sort( x )
+        np.testing.assert_array_equal( e, y ) 
+        
+    def test__merge2(self):
+        
+        x = np.array( [ 1, 2 ] )
+        
+        y = np.empty_like( x )
+        sas._merge( x, y, 0, 1, 2 )
+        
+        e = np.sort( x )
+        np.testing.assert_array_equal( e, y ) 
+        
+    def test__merge3(self):
+        
+        x = np.array( [ 2, 1 ] )
+        
+        y = np.empty_like( x )
+        sas._merge( x, y, 0, 1, 2 )
+        
+        e = np.sort( x )
+        np.testing.assert_array_equal( e, y ) 
+        
+    def test__merge4(self):
+        
+        x = np.array( [ 2, 1, 3 ] )
+        
+        y = np.empty_like( x )
+        sas._merge( x, y, 0, 1, 3 )
+        
+        e = np.sort( x )
+        np.testing.assert_array_equal( e, y )
+        
+    def test__merge5(self):
+        
+        x = np.array( [ 1, 2, 0 ] )
+        
+        y = np.empty_like( x )
+        sas._merge( x, y, 0, 2, 3 )
+        
+        e = np.sort( x )
+        np.testing.assert_array_equal( e, y )
+        
+    def test__merge6(self):
+        
+        x = np.array( [ 1, 1, 0 ] )
+        
+        y = np.empty_like( x )
+        sas._merge( x, y, 0, 2, 3 )
+        
+        e = np.sort( x )
+        np.testing.assert_array_equal( e, y )
+        
+        
+    def test_mergeb(self):
+        
+        x = np.array( [ 3,4,1,2 ] )
+        
+        
+        y = sas.merge2( x )
+        
+        e = np.sort( x )
+        np.testing.assert_array_equal( e, y )
+        
+    def test__mergeb(self):
+        
+        x = np.array( [ 3,4,1,2 ] )
+        
+        y = np.empty_like( x )
+        sas._merge2( x, y, 0, 2, 4 )
+        
+        e = np.sort( x )
+        np.testing.assert_array_equal( e, y )
+        
+    def test__mergeb2(self):
+        
+        x = np.array( [ 1, 3, 2, 4 ] )
+        
+        y = np.empty_like( x )
+        sas._merge2( x, y, 0, 2, 4 )
+        
+        e = np.sort( x )
+        np.testing.assert_array_equal( e, y ) 
+        
+    def test_merge(self):
+        
+        x = np.array( [ 1, 3, 2, 4, 5, 7, 6, 8, 9 ] )
+        
+        r = sas.merge( x )
+        e = np.sort( x )
+        np.testing.assert_equal( e, r )
+        
+    
+        
+    def test_merge_multi(self):
+        
+        n0 = 21
+        n1 = 10000
+        N  = 1
+        
+        for n in range( n0, n1 ):
+            x = np.random.random_integers( 0, n, size=n )#.astype( np.int8 )
+        
+            with Timer(  ) as t0:
+                for _ in range( N ):
+                    r = sas.merge( x )
+            r2 = x.copy()
+            with Timer(  ) as t0b:                
+                for _ in range( N ):
+                    r2 = sas.merge2( r2 )
+            r3 = x.copy()
+            with Timer() as t_qs:
+                sas.quick_sort(r3)
+            with Timer(  ) as t1:
+                for _ in range( N ):
+                    e = np.sort( x, kind='merge' )
+            np.testing.assert_equal( r, r2 )
+            np.testing.assert_equal( r, e )
+            print( 'nb/np performance %s'%(t0.interval/t1.interval ))
+            print( 'nb2/np performance %s'%(t0b.interval/t1.interval ))
+            print( 't_qs/np performance %s'%(t_qs.interval/t1.interval ))
+            np.testing.assert_equal( e, r )
+            
+    def test_mergesort_recursive(self):
+        
+        x = np.array( [ 1, 3, 2, 4, 5, 7, 6, 8, 9 ] )
+        
+        r = sas.mergesort_recursive( x )
+        e = np.sort( x )
+        np.testing.assert_equal( e, r )

@@ -149,8 +149,8 @@ class JaggedKeyValueArray( object ):
     def __repr__( self ):
         
         if len(self)>6:
-            rows0 = '\n'.join( [ '\t%s,'%x for x in self[:3] ] )
-            rows1 = '\n'.join( [ '\t%s,'%x for x in self[-4:] ] )
+            rows0 = '\n'.join( [ '\t%s,%s,'%x for x in self[:3] ] )
+            rows1 = '\n'.join( [ '\t%s,%s,'%x for x in self[-4:] ] )
             return '[\n%s\n\t...\n%s\n]'%(rows0,rows1)
         else:
             rows = '\n'.join( [ '\t%s,'%str(x) for x in self ] )
