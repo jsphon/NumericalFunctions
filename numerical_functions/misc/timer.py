@@ -1,4 +1,5 @@
-import time
+#import time
+from datetime import datetime
 
 class Timer:    
     
@@ -6,14 +7,17 @@ class Timer:
         self.title=title
         
     def __enter__(self):
-        if self.title:
-            print( 'Beginning {0}'.format( self.title ) )
-        self.start = time.clock()
+        #if self.title:
+        #    print( 'Beginning {0}'.format( self.title ) )
+        #self.start = time.clock()
+        self.start = datetime.utcnow()
         return self
 
     def __exit__(self, *args):
-        self.end = time.clock()
-        self.interval = self.end - self.start
+        #self.end = time.clock()
+        #self.interval = self.end - self.start
+        self.end = datetime.utcnow()
+        self.interval = ( self.end - self.start ).total_seconds()
         if self.title:
             print( '{1} took {0:0.4f} seconds'.format( self.interval, self.title ) )
         else:

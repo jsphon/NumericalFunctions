@@ -14,6 +14,59 @@ from numerical_functions.misc.timer import Timer
 from jagged_array.jagged_key_value_array import JaggedKeyValueArray
 
         
+class MoreJaggedKeyValueArrayTests( unittest.TestCase ):
+
+    def test_to_dense_slice_from_beginning(self):
+        ''' Check that it works when the bounds start before/after the end'''    
+        k0 = [ 10, 11 ]
+        k1 = [ 12, 13 ]
+        k2 = [ 11, 12, 13, 14 ]
+        
+        v0 = [ 1, 2 ]
+        v1 = [ 2, 3 ]
+        v2 = [ 4, 5, 6, 7 ]
+        
+        keys = k0 + k1 + k2
+        vals = v0 + v1 + v2
+
+        bounds = [ 0, 2, 4, 7 ]
+        
+        arr = JaggedKeyValueArray( keys, vals, bounds )
+        
+        v, k = arr[1:].to_dense()
+        
+        expected_v = np.array( [ [ 0, 2, 3 ], [4, 5, 6 ] ] )
+        expected_k = np.array( [ 11, 12, 13 ] )
+ 
+        np.testing.assert_array_equal( expected_v, v )
+        np.testing.assert_array_equal( expected_k, k )
+        
+    def test_to_dense_slice_to_end(self):
+        ''' Check that it works when the bounds start before/after the end'''    
+        k0 = [ 10, 11, 12 ]
+        k1 = [ 12, 13 ]
+        k2 = [ 11, 12, 13, 14 ]
+        
+        v0 = [ 1, 2, 3 ]
+        v1 = [ 2, 3 ]
+        v2 = [ 4, 5, 6, 7 ]
+        
+        keys = k0 + k1 + k2
+        vals = v0 + v1 + v2
+
+        bounds = [ 0, 3, 5, 8 ]
+        
+        arr = JaggedKeyValueArray( keys, vals, bounds )
+        
+        v, k = arr[:2].to_dense()
+        
+        expected_v = np.array( [ [ 1, 2, 3, 0 ], [0, 0, 2, 3 ] ] )
+        expected_k = np.array( [ 10, 11, 12, 13 ] )
+ 
+        np.testing.assert_array_equal( expected_v, v )
+        np.testing.assert_array_equal( expected_k, k )
+                                      
+                                      
 class JaggedKeyValueArrayTests( unittest.TestCase ):
     
     def setUp(self):
@@ -32,6 +85,17 @@ class JaggedKeyValueArrayTests( unittest.TestCase ):
         self.bounds = [ 0, 1, 3, 6 ]
         
         self.arr = JaggedKeyValueArray( self.keys, self.vals, self.bounds )
+ 
+    def test___bool__(self):
+        
+        self.assertTrue( bool( self.arr ) )
+        
+    def test___bool__False(self):
+        k = []
+        v = []
+        bounds = []
+        arr = JaggedKeyValueArray( k, v, bounds )
+        self.assertFalse( bool( arr ) )
  
     def test_cumsum(self):
         
@@ -144,6 +208,16 @@ class JaggedKeyValueArrayTests( unittest.TestCase ):
         #print( r[1] )
         np.testing.assert_equal( e0, r[0] )
         np.testing.assert_equal( e1, r[1] )
+        
+    def test___getitem__2dslice4(self):
+        
+        k, v = self.arr[ :,-1 ]
+        
+        expected_keys = np.array( [ 11, 13, 13 ] )
+        expected_vals = np.array( [ 1, 3, 6 ] )
+        
+        np.testing.assert_equal( expected_keys, k )
+        np.testing.assert_equal( expected_vals, v )
     
     def test_to_dense(self):
         

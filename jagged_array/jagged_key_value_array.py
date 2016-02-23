@@ -74,6 +74,9 @@ class JaggedKeyValueArray( object ):
         
         return JaggedKeyValueArray.from_lists( keys, values )
     
+    def __bool__(self):
+        return bool( self.keys.shape[0] )
+    
     def __len__(self):
         return self.bounds.shape[0]-1
             
@@ -144,7 +147,17 @@ class JaggedKeyValueArray( object ):
                             ii+=1
                         
                         return key_result, val_result
-                               
+                    
+                elif isinstance( i1, INT_TYPES ):
+                    key_result = np.zeros( len( self ) )
+                    val_result = np.zeros( len( self ) )
+                    
+                    for i, row in enumerate( range( row_start, row_end ) ):
+                        row_key, row_val = self[row]
+                        key_result[i]=row_key[i1]
+                        val_result[i]=row_val[i1]
+                    return key_result, val_result        
+                           
         raise Exception( 'Not implemented for slice %s'%str(i))
     def __repr__( self ):
         
@@ -166,17 +179,25 @@ class JaggedKeyValueArray( object ):
 
     def to_dense( self, default_value=0 ):
     
-        unique_keys, inverse_data = np.unique( self.keys, return_inverse=True)
+        i0 = self.bounds[0]
+        i1 = self.bounds[-1]
+        keys = self.keys[i0:i1]
+        vals = self.values[i0:i1]
+        bounds = self.bounds - i0
+        unique_keys, inverse_data = np.unique( keys, return_inverse=True)
         
-        data = _kv_to_dense( self.keys, self.values, self.bounds, unique_keys, inverse_data, default_value )
+        data = _kv_to_dense( keys, vals, bounds, unique_keys, inverse_data, default_value )
         
         return data, unique_keys
     
     def cumsum(self):
         unique_keys, inverse_data = np.unique( self.keys, return_inverse=True)
         
-        cs_keys, cs_vals, cs_bounds = _cumsum(self.keys, self.values, self.bounds, unique_keys, inverse_data)
-        return JaggedKeyValueArray( cs_keys, cs_vals, cs_bounds )
+        if self:
+            cs_keys, cs_vals, cs_bounds = _cumsum(self.keys, self.values, self.bounds, unique_keys, inverse_data)
+            return JaggedKeyValueArray( cs_keys, cs_vals, cs_bounds )
+        else:
+            return JaggedKeyValueArray( [], [], [] )
         
 @nb.jit( nopython=True )
 def _cumsum( keys, values, bounds, unique_keys, inverse_data ):
