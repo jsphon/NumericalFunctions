@@ -96,6 +96,17 @@ class JaggedKeyValueArrayTests( unittest.TestCase ):
         bounds = []
         arr = JaggedKeyValueArray( k, v, bounds )
         self.assertFalse( bool( arr ) )
+        
+    def test_to_dense_projection(self):
+        projection = np.array( [ 10, 11, 12, 13, 14 ] )
+        d= self.arr.to_dense_projection( projection )
+        
+        expected_d = np.array( [ [ 0, 1, 0, 0, 0 ],
+                                 [ 0, 0, 2, 3, 0 ],
+                                 [ 0, 4, 5, 6, 0 ] ] )
+        
+        print( 'd', d )
+        np.testing.assert_array_equal( expected_d, d )
  
     def test_cumsum(self):
         

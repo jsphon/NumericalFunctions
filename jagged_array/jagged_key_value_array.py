@@ -7,6 +7,7 @@ Created on 1 Aug 2015
 from jagged_array.jagged_array import JaggedArray
 import numba as nb
 import numpy as np
+from numerical_functions import numba_funcs as nf
 
 INT_TYPES = ( int, np.int, np.int64 )
 
@@ -176,6 +177,12 @@ class JaggedKeyValueArray( object ):
     def get_values_array(self):
         """ Return a jagged array of values """
         return JaggedArray( self.values, self.bounds )
+    
+    def to_dense_projection( self, projection, default_value=0 ):
+        ''' Convert to a dense array, using projection as the keys
+        '''
+        d, k = self.to_dense( default_value=default_value )
+        return _kv_to_dense_projection( d, k, projection )
 
     def to_dense( self, default_value=0 ):
     
@@ -223,6 +230,17 @@ def _cumsum( keys, values, bounds, unique_keys, inverse_data ):
         cs_bounds[i+1]=pos
             
     return cs_keys[:pos].copy(), cs_vals[:pos].copy(), cs_bounds
+
+@nb.jit( nopython=True )
+def _kv_to_dense_projection( d, k, projection ):
+    r = np.zeros( ( d.shape[0], projection.shape[0] ), d.dtype )
+    for i in range( r.shape[1] ):
+        v = projection[ i ]
+        j    = nf.binary_search( k, v )
+        if (j<k.shape[0]) and ( k[ j ]==v ):
+            for row in range( d.shape[0] ):
+                r[ row, i ] = d[ row, j ]
+    return r
     
 @nb.jit( nopython=True )
 def _kv_to_dense( key_data, val_data, bounds, unique_keys, inverse_data, default_value ):
