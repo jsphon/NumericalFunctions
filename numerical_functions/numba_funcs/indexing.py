@@ -62,4 +62,19 @@ def swap_row_cols( X, i, j ):
         t = X[ j, a ]
         X[ j, a ] = X[ i, a ]
         X[ i, a ] = t
+        
+@nb.autojit( nopython=True )
+def get_resample_indices( raw_index, desired_index ):
+    ''' For each value x of desired_index, find the highest value
+    of raw_index that is less than x
+    raw_index and desired_index must be sorted
+    '''
+    resample_idx = np.empty_like(desired_index)
+    unsampled_i = 0
+    for iX in range( desired_index.shape[0] ):
+        while unsampled_i<raw_index.shape[0] and raw_index[unsampled_i]<desired_index[iX]:
+            unsampled_i+=1
+        resample_idx[ iX ] = unsampled_i-1
+        
+    return resample_idx
             

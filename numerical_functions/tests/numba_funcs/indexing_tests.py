@@ -5,7 +5,7 @@ Created on 27 Mar 2015
 '''
 
 import matplotlib.pyplot as plt
-from numba_funcs.timer import Timer
+from numerical_functions import Timer
 import numerical_functions.numba_funcs.indexing as indexing
 import numpy as np
 import unittest
@@ -123,6 +123,16 @@ class Test(unittest.TestCase):
         r2 = np.array( [ [ 4, 5 ], [24, 25 ] ] )
         np.testing.assert_array_equal( r2, result[:,2:])       
 
+    def test_get_resample_indices(self):
+        
+        raw_index       = np.arange( 10 )
+        resampled_index = np.arange( 1, 10, 2 )
+
+        result = indexing.get_resample_indices(raw_index, resampled_index)
+        expected        = np.arange( 0, 10, 2 )
+        
+        np.testing.assert_array_equal( expected, result )
+        
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
     unittest.main()
