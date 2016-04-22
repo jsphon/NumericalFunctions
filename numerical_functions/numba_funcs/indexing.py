@@ -47,7 +47,7 @@ def square_and_rect_take_to_out( source, idx0, idx1, out ):
         k = idx0.shape[0]
         for j in range( idx1.shape[0] ):
             out[ i, k ] = source[ idx0[i], idx1[j ]]
-            k+=1 
+            k+=1
             
 @nb.autojit
 def swap_row_cols( X, i, j ):
@@ -77,4 +77,27 @@ def get_resample_indices( raw_index, desired_index ):
         resample_idx[ iX ] = unsampled_i-1
         
     return resample_idx
-            
+
+@nb.autojit()
+def take_upper_off_diagonal( X, idx ):
+    '''
+    :param X:
+    :param idx:
+    :return: The upper off diagonal values of X
+    '''
+    result =  np.ndarray( idx.shape[0]*(idx.shape[0]-1)/2, dtype=X.dtype )
+    return _take_upper_off_diagonal( X, idx, result )
+
+@nb.autojit( nopython=True )
+def _take_upper_off_diagonal( X, idx, result ):
+    '''
+    :param X:
+    :param idx:
+    :return: The upper off diagonal values of X
+    '''
+    k = 0
+    for i in range( idx.shape[0]-1 ):
+        for j in range( i+1, idx.shape[0]):
+            result[k] = X[ idx[i], idx[j] ]
+            k+=1
+    return result

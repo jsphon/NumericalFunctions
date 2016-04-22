@@ -112,14 +112,9 @@ class Test(unittest.TestCase):
         idx1 = np.arange( 4, 6 )
         
         result = np.empty( ( idx0.shape[0], idx0.shape[0]+idx1.shape[0] ) )
-        af.square_and_rect_take_to_out( X, idx0, idx1, result )
+        indexing.square_and_rect_take_to_out( X, idx0, idx1, result )
         
-        print( X )
-        print( idx0 )
-        print( idx1 )
-        print( result )
-        
-        np.testing.assert_array_equal( result[:,:2], af.square_take( X, idx0 ) )
+        np.testing.assert_array_equal( result[:,:2], indexing.square_take( X, idx0 ) )
         r2 = np.array( [ [ 4, 5 ], [24, 25 ] ] )
         np.testing.assert_array_equal( r2, result[:,2:])       
 
@@ -132,7 +127,35 @@ class Test(unittest.TestCase):
         expected        = np.arange( 0, 10, 2 )
         
         np.testing.assert_array_equal( expected, result )
-        
+
+    def test_take_upper_off_diagonal(self):
+
+        X = np.array( [[ 1, 2, 3],
+                      [ np.nan, 5, 6],
+                      [ np.nan, np.nan, 9]])
+
+        idx      = np.array( [ 0, 1 ] )
+        expected = np.array( [ 2 ] )
+        actual   = indexing.take_upper_off_diagonal( X, idx )
+        np.testing.assert_array_equal( actual, expected )
+
+        idx      = np.array( [ 1, 2 ] )
+        expected = np.array( [ 6 ] )
+        actual   = indexing.take_upper_off_diagonal( X, idx )
+        np.testing.assert_array_equal( actual, expected )
+
+        idx      = np.array( [ 0, 2 ] )
+        expected = np.array( [ 3 ] )
+        actual   = indexing.take_upper_off_diagonal( X, idx )
+        np.testing.assert_array_equal( actual, expected )
+
+        idx      = np.array( [ 0, 1, 2 ] )
+        expected = np.array( [ 2, 3, 6 ] )
+        actual   = indexing.take_upper_off_diagonal( X, idx )
+        np.testing.assert_array_equal( actual, expected )
+
+
+
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
     unittest.main()
