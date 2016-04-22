@@ -47,7 +47,7 @@ def square_and_rect_take_to_out( source, idx0, idx1, out ):
         k = idx0.shape[0]
         for j in range( idx1.shape[0] ):
             out[ i, k ] = source[ idx0[i], idx1[j ]]
-            k+=1
+            k+=1 
             
 @nb.autojit
 def swap_row_cols( X, i, j ):
