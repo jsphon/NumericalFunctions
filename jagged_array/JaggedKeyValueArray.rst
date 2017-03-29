@@ -1,5 +1,5 @@
 
-JaggedKeyValueAray
+JaggedKeyValueArray
 ==================
 
 This is a variation of a sparse matrix or Pandas dataframe.
