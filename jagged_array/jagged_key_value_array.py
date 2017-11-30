@@ -212,7 +212,7 @@ class JaggedKeyValueArray(object):
 
 @nb.jit(nopython=True)
 def _cumsum(keys, values, bounds, unique_keys, inverse_data):
-    buffer = np.zeros_like(unique_keys, np.int_)
+    buffer = np.zeros_like(unique_keys, dtype=values.dtype)
     max_possible_length = (bounds.shape[0] - 1) * unique_keys.shape[0]
     cs_keys = np.empty(max_possible_length, dtype=keys.dtype)
     cs_vals = np.empty(max_possible_length, dtype=values.dtype)
