@@ -4,9 +4,14 @@ Created on 1 Aug 2015
 @author: jon
 '''
 
-from jagged_array.jagged_array import JaggedArray
+
+import datetime
+
 import numba as nb
+import pandas as pd
 import numpy as np
+
+from jagged_array.jagged_array import JaggedArray
 from numerical_functions import numba_funcs as nf
 
 INT_TYPES = (int, np.int, np.int64)
@@ -15,7 +20,7 @@ DEFAULT_DTYPE = np.float32
 
 class JaggedKeyValueArray(object):
 
-    def __init__(self, keys, values, bounds, dtype=None):
+    def __init__(self, keys, values, bounds, dtype=None, index=None):
 
         dtype = dtype or DEFAULT_DTYPE
 
@@ -33,6 +38,8 @@ class JaggedKeyValueArray(object):
             self.bounds = bounds
         else:
             self.bounds = np.array(bounds, dtype=np.int)
+
+        self.index = index
 
     @staticmethod
     def from_lists(key_list, val_list, dtype=None):
@@ -84,7 +91,6 @@ class JaggedKeyValueArray(object):
         return self.bounds.shape[0] - 1
 
     def __eq__(self, other):
-        # print( 'testing eq')
         if not isinstance(other, JaggedKeyValueArray):
             return False
         if len(self) != len(other):
@@ -100,6 +106,24 @@ class JaggedKeyValueArray(object):
         return True
 
     def __getitem__(self, i):
+
+        if isinstance(self.index, pd.DatetimeIndex):
+            if isinstance(i, (datetime.datetime, pd.Timestamp)):
+                i0 = self.index.get_loc(i)
+                return self[i0]
+
+            if isinstance(i, slice):
+                i0 = self.index.get_loc(i.start) if i.start else None
+                i1 = self.index.get_loc(i.stop) + 1 if i.stop else None
+
+                print('i1', i1)
+                s = slice(i0, i1, i.step)
+                return JaggedKeyValueArray(
+                    self.keys,
+                    self.values,
+                    self.bounds[s],
+                    index=self.index[i0:i1]
+                )
 
         if isinstance(i, INT_TYPES):
             i0 = self.bounds[i]
