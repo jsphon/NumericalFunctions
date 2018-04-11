@@ -6,6 +6,7 @@ Created on 1 Aug 2015
 
 
 import datetime
+from operator import is_
 
 import numba as nb
 import pandas as pd
@@ -105,18 +106,29 @@ class JaggedKeyValueArray(object):
 
         return True
 
+    def get_between(self, d0, d1):
+        ''' Get a JaggedKeyValue array that is between d0 and d1.
+        The result does not include d0 or d1
+        It assumes the index is sorted.
+        '''
+        i0 = self.index.searchsorted(d0)+1
+        i1 = self.index.searchsorted(d1)
+        result = self[i0:i1]
+        return result
+
     def __getitem__(self, i):
 
         if isinstance(self.index, pd.DatetimeIndex):
-            if isinstance(i, (datetime.datetime, pd.Timestamp)):
+            if is_date_type(i):
                 i0 = self.index.get_loc(i)
                 return self[i0]
 
-            if isinstance(i, slice):
+            if isinstance(i, slice)\
+                    and (is_date_type(i.start) or is_date_type(i.stop)):
+
                 i0 = self.index.get_loc(i.start) if i.start else None
                 i1 = self.index.get_loc(i.stop) + 1 if i.stop else None
 
-                print('i1', i1)
                 s = slice(i0, i1, i.step)
                 return JaggedKeyValueArray(
                     self.keys,
@@ -132,7 +144,12 @@ class JaggedKeyValueArray(object):
 
         if isinstance(i, slice):
             s = slice(i.start, i.stop + 1 if i.stop else None, i.step)
-            return JaggedKeyValueArray(self.keys, self.values, self.bounds[s])
+            if self.index is not None:
+                s1 = slice(i.start, i.stop if i.stop else None, i.step)
+                index = self.index[s1]
+            else:
+                index = None
+            return JaggedKeyValueArray(self.keys, self.values, self.bounds[s], index=index)
 
         if isinstance(i, tuple):
             # print( 'i is a tuple')
@@ -232,6 +249,10 @@ class JaggedKeyValueArray(object):
             return JaggedKeyValueArray(cs_keys, cs_vals, cs_bounds)
         else:
             return JaggedKeyValueArray([], [], [])
+
+
+def is_date_type(x):
+    return isinstance(x, (datetime.datetime, pd.Timestamp))
 
 
 @nb.jit(nopython=True)

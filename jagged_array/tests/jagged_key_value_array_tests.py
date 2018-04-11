@@ -302,6 +302,18 @@ class JaggedKeyValueArrayWithDateTimeIndexTests(unittest.TestCase):
             index=self.index
         )
 
+    def test_get_between(self):
+        d0 = datetime.date(2018, 1, 1)
+        d1 = datetime.date(2018, 1, 2)
+        d2 = datetime.date(2018, 1, 3)
+
+        result = self.arr.get_between(d0, d2)
+
+        expected_index = pd.DatetimeIndex([d1])
+        self.assertEqual(expected_index, result.index)
+        np.testing.assert_array_equal(self.k1, result[0][0])
+        np.testing.assert_array_equal(self.v1, result[0][1])
+
     def test___getitem__row0(self):
         r = self.arr[self.index[0]]
 
