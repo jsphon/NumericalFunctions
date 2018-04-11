@@ -1,4 +1,6 @@
 
+TODO: Add example using DateTimeIndex from Pandas.
+
 JaggedKeyValueArray
 ==================
 
