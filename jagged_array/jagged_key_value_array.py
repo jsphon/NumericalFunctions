@@ -251,6 +251,11 @@ class JaggedKeyValueArray(object):
             return JaggedKeyValueArray([], [], [])
 
 
+def get_resample_indices(date_range, freq):
+    floored = date_range.floor(freq)
+    return np.where(np.diff(floored))[0] + 1
+
+
 def is_date_type(x):
     return isinstance(x, (datetime.datetime, pd.Timestamp))
 

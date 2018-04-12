@@ -4,6 +4,7 @@ import pandas as pd
 import unittest
 
 from jagged_array.jagged_key_value_array import JaggedKeyValueArray
+import jagged_array.jagged_key_value_array as mod
 
 
 class MoreJaggedKeyValueArrayTests(unittest.TestCase):
@@ -293,7 +294,9 @@ class JaggedKeyValueArrayWithDateTimeIndexTests(unittest.TestCase):
 
         self.bounds = [0, 1, 3, 6]
 
-        self.index = pd.date_range('20180101', '20180103')
+        #self.index = pd.date_range('20180101', '20180103')
+        self.index = pd.date_range('2018-01-01 00:00:03', freq='1s', periods=3)
+
 
         self.arr = JaggedKeyValueArray(
             self.keys,
@@ -303,9 +306,13 @@ class JaggedKeyValueArrayWithDateTimeIndexTests(unittest.TestCase):
         )
 
     def test_get_between(self):
-        d0 = datetime.date(2018, 1, 1)
-        d1 = datetime.date(2018, 1, 2)
-        d2 = datetime.date(2018, 1, 3)
+        #d0 = datetime.date(2018, 1, 1)
+        #d1 = datetime.date(2018, 1, 2)
+        #d2 = datetime.date(2018, 1, 3)
+
+        d0 = self.index[0]
+        d1 = self.index[1]
+        d2 = self.index[2]
 
         result = self.arr.get_between(d0, d2)
 
@@ -340,7 +347,22 @@ class JaggedKeyValueArrayWithDateTimeIndexTests(unittest.TestCase):
         self.assertEqual(0, r.bounds[0])
         self.assertEqual(1, r.bounds[1])
 
-    # def test__getitem_1dslice2(self):
+    def test_get_resample_indices(self):
+
+        date_range = pd.date_range('20180101', freq='1s', periods=11)
+
+        result = mod.get_resample_indices(date_range, freq='5s')
+
+        expected = np.array([5, 10])
+        np.testing.assert_array_equal(expected, result)
+
+
+
+
+
+
+
+        # def test__getitem_1dslice2(self):
     #     r = self.arr[self.index[1]:]
     #     print('test__getitem_1dslice: %s' % r)
     #     self.assertIsInstance(r, JaggedKeyValueArray)
