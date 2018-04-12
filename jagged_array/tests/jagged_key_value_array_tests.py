@@ -347,7 +347,7 @@ class JaggedKeyValueArrayWithDateTimeIndexTests(unittest.TestCase):
 
         result = mod.get_resample_indices(date_range, freq='5s')
 
-        expected = np.array([5, 10])
+        expected = np.array([4, 9])
         np.testing.assert_array_equal(expected, result)
 
     def test_resample(self):

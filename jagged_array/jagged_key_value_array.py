@@ -156,7 +156,6 @@ class JaggedKeyValueArray(object):
             return JaggedKeyValueArray(self.keys, self.values, self.bounds[s], index=index)
 
         if isinstance(i, tuple):
-            # print( 'i is a tuple')
             i0 = i[0]
             i1 = i[1]
             if isinstance(i0, INT_TYPES):
@@ -259,11 +258,6 @@ class JaggedKeyValueArray(object):
         cs = self.cumsum()
 
         data, unique_keys = cs.to_dense()
-
-        print('data : %s' % str(data))
-        print('keys : %s' % str(unique_keys))
-        print('indices : %s' % str(indices))
-        keys = []
 
         old_row = np.zeros_like(unique_keys, dtype=np.int)
 
