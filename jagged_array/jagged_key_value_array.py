@@ -104,6 +104,10 @@ class JaggedKeyValueArray(object):
         if not np.array_equal(self.values, other.values):
             return False
 
+        if (self.index is not None) or (other.index is not None):
+
+            return self.index==other.index
+
         return True
 
     def get_between(self, d0, d1):
@@ -250,10 +254,39 @@ class JaggedKeyValueArray(object):
         else:
             return JaggedKeyValueArray([], [], [])
 
+    def resample(self, freq):
+        indices = get_resample_indices(self.index, freq)
+        cs = self.cumsum()
+
+        data, unique_keys = cs.to_dense()
+
+        print('data : %s' % str(data))
+        print('keys : %s' % str(unique_keys))
+        print('indices : %s' % str(indices))
+        keys = []
+
+        old_row = np.zeros_like(unique_keys, dtype=np.int)
+
+        row_diffs = []
+        for i in indices:
+            row = data[i]
+            row_diff = row-old_row
+            row_diffs.append(row_diff)
+            old_row = row
+
+        last_row = data[-1]
+        last_row_diff = last_row - old_row
+        row_diffs.append(last_row_diff)
+
+        diff_data = np.r_[row_diffs]
+        result = JaggedKeyValueArray.from_dense(diff_data, unique_keys, dtype=np.int)
+        result.index = self.index[indices+1].insert(0, self.index[0].floor(freq))
+        return result
+
 
 def get_resample_indices(date_range, freq):
     floored = date_range.floor(freq)
-    return np.where(np.diff(floored))[0] + 1
+    return np.where(np.diff(floored))[0]
 
 
 def is_date_type(x):

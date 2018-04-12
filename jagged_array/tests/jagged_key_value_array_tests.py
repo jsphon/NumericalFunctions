@@ -294,9 +294,7 @@ class JaggedKeyValueArrayWithDateTimeIndexTests(unittest.TestCase):
 
         self.bounds = [0, 1, 3, 6]
 
-        #self.index = pd.date_range('20180101', '20180103')
         self.index = pd.date_range('2018-01-01 00:00:03', freq='1s', periods=3)
-
 
         self.arr = JaggedKeyValueArray(
             self.keys,
@@ -306,10 +304,6 @@ class JaggedKeyValueArrayWithDateTimeIndexTests(unittest.TestCase):
         )
 
     def test_get_between(self):
-        #d0 = datetime.date(2018, 1, 1)
-        #d1 = datetime.date(2018, 1, 2)
-        #d2 = datetime.date(2018, 1, 3)
-
         d0 = self.index[0]
         d1 = self.index[1]
         d2 = self.index[2]
@@ -356,7 +350,25 @@ class JaggedKeyValueArrayWithDateTimeIndexTests(unittest.TestCase):
         expected = np.array([5, 10])
         np.testing.assert_array_equal(expected, result)
 
+    def test_resample(self):
 
+        k0 = [11, 12, 13]
+        k2 = [11, 12, 13]
+
+        v0 = [1, 2, 3]
+        v2 = [4, 5, 6]
+
+        expected = JaggedKeyValueArray.from_lists([k0,k2], [v0,v2])
+        expected.index = pd.date_range('2018-01-01 00:00:00', freq='5s', periods=2)
+
+        result = self.arr.resample('5s')
+
+        print('Resample result is %s' % result)
+
+        np.testing.assert_array_equal(expected.keys, result.keys)
+        np.testing.assert_array_equal(expected.values, result.values)
+        np.testing.assert_array_equal(expected.bounds, result.bounds)
+        np.testing.assert_array_equal(expected.index, result.index)
 
 
 
