@@ -253,6 +253,25 @@ class JaggedKeyValueArray(object):
         else:
             return JaggedKeyValueArray([], [], [])
 
+    def get_v(self, freq):
+
+        indices = get_resample_indices(self.index, freq)
+
+        result = np.ndarray(len(indices)+1, dtype=self.values.dtype)
+        values0 = self.values[:indices[0]+1]
+        result[0] = values0.sum()
+
+        for i in range(len(indices)-1):
+            idx0 = self.bounds[indices[i]+1]
+            idx1 = self.bounds[indices[i+1]+1]
+            values = self.values[idx0:idx1]
+            result[i+1] = values.sum()
+
+        idx = self.bounds[indices[-1]+1]
+        values1 = self.values[idx:]
+        result[-1] = values1.sum()
+        return result
+
     def get_hl(self, freq):
         resampled = self.resample(freq)
         result = []
