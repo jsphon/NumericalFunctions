@@ -308,6 +308,12 @@ class OHLCTests(unittest.TestCase):
             index=self.index
         )
 
+    def test_get_c(self):
+        result = self.arr.get_c('5s')
+        expected = np.array([11, 12, 14])
+
+        np.testing.assert_array_equal(expected, result)
+
     def test_get_o(self):
 
         result = self.arr.get_o('5s')
