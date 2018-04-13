@@ -270,16 +270,16 @@ class JaggedKeyValueArray(object):
     def get_o(self, freq):
         indices = get_resample_indices(self.index, freq)
         keys = self.get_keys_array()
-        result = []
+
+        result = np.ndarray(len(indices)+1, dtype=keys.dtype)
 
         row = keys[0]
-        result.append(row[(-1+row.shape[0])//2])
-        for i in indices:
+        result[0] = row[(-1+row.shape[0])//2]
+        for c, i in enumerate(indices):
             row = keys[i+1]
             median = row[(-1+row.shape[0])//2]
-            result.append(median)
+            result[c+1] = median
         return np.array(result)
-
 
     def resample(self, freq):
         indices = get_resample_indices(self.index, freq)
