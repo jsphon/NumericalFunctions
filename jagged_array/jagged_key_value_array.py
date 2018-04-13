@@ -253,6 +253,21 @@ class JaggedKeyValueArray(object):
         else:
             return JaggedKeyValueArray([], [], [])
 
+    def get_hl(self, freq):
+        resampled = self.resample(freq)
+        result = []
+        for row in resampled.get_keys_array():
+            result.append([np.max(row), np.min(row)])
+        return np.array(result)
+
+    def get_h(self, freq):
+        resampled = self.resample(freq)
+        result = []
+        for row in resampled.get_keys_array():
+            result.append(np.max(row))
+        return np.array(result)
+
+
     def resample(self, freq):
         indices = get_resample_indices(self.index, freq)
         cs = self.cumsum()
@@ -274,12 +289,16 @@ class JaggedKeyValueArray(object):
 
         diff_data = np.r_[row_diffs]
         result = JaggedKeyValueArray.from_dense(diff_data, unique_keys, dtype=np.int)
-        result.index = self.index[indices+1].insert(0, self.index[0].floor(freq))
+
+        floored = self.index.floor(freq)
+        result.index = floored[indices+1].insert(0, self.index[0].floor(freq))
         return result
 
 
 def get_resample_indices(date_range, freq):
+    # TODO: Inefficient, date_range.floor also called in parent
     floored = date_range.floor(freq)
+    #print('floored : %s' % str(floored))
     return np.where(np.diff(floored))[0]
 
 

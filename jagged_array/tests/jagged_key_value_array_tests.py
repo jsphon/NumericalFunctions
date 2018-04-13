@@ -135,7 +135,6 @@ class JaggedKeyValueArrayTests(unittest.TestCase):
         self.assertEqual(np.float32, result.keys.dtype)
         self.assertEqual(np.float32, result.values.dtype)
 
-
     def test___len__(self):
         self.assertEqual(3, len(self.arr))
 
@@ -277,6 +276,52 @@ class JaggedKeyValueArrayTests(unittest.TestCase):
         np.testing.assert_array_equal(e0, r.values)
         np.testing.assert_array_equal(e1, r.keys)
         np.testing.assert_array_equal(e2, r.bounds)
+
+
+class OHLCTests(unittest.TestCase):
+
+    def setUp(self):
+        self.k0 = [11, ]
+        self.k1 = [12, 13]
+        self.k2 = [11, 12, 13]
+        self.k3 = [12, 13, 14]
+        self.k4 = [11, 14, 16]
+        self.k5 = [13, 14, 15]
+
+        self.v0 = [1, ]
+        self.v1 = [2, 3]
+        self.v2 = [4, 5, 6]
+        self.v3 = [7, 8, 9]
+        self.v4 = [10, 11, 13]
+        self.v5 = [14, 15, 16]
+
+        self.keys = self.k0 + self.k1 + self.k2 + self.k3 + self.k4 + self.k5# + self.k6
+        self.vals = self.v0 + self.v1 + self.v2 + self.v3 + self.v4 + self.v5# + self.v6
+
+        self.bounds = [0, 1, 3, 6, 9, 12]
+
+        self.index = pd.date_range('2018-01-01 00:00:04', freq='2s', periods=6)
+        self.arr = JaggedKeyValueArray(
+            self.keys,
+            self.vals,
+            self.bounds,
+            index=self.index
+        )
+
+    def test_get_hl(self):
+
+        result = self.arr.get_hl('5s')
+        expected = np.array([[11, 11], [13, 11], [16, 11]])
+
+        np.testing.assert_array_equal(expected, result)
+
+    def test_get_hl(self):
+
+        result = self.arr.get_h('5s')
+        expected = np.array([11, 13, 16])
+
+        np.testing.assert_array_equal(expected, result)
+
 
 
 class JaggedKeyValueArrayWithDateTimeIndexTests(unittest.TestCase):
