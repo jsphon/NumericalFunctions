@@ -259,17 +259,20 @@ class JaggedKeyValueArray(object):
         result = np.zeros((len(indices) + 1, 4), dtype=self.values.dtype)
 
         values0 = self.keys[:indices[0] + 1]
-        result[0, 0] = values0[(-1+values0.shape[0])//2]
         result[0, 1] = values0.max()
         result[0, 2] = values0.min()
+
+        idx0 = self.bounds[indices[0]]
+        idx0b = self.bounds[indices[0]+1]
+        values0 = self.keys[idx0:idx0b]
+
+        result[0, 0] = values0[(-1 + values0.shape[0]) // 2]
 
         idx1 = self.bounds[indices[0] + 1]
         idx1b = self.bounds[indices[0] + 2]
         values0b = self.keys[idx1:idx1b]
 
-        med = values0b[(-1+values0b.shape[0])//2]
-
-        result[0, 3] = med
+        result[0, 3] = values0b[(-1+values0b.shape[0])//2]
 
         for i in range(len(indices) - 1):
             idx0 = self.bounds[indices[i] + 1]
@@ -391,6 +394,16 @@ class JaggedKeyValueArray(object):
         floored = self.index.floor(freq)
         result.index = floored[indices+1].insert(0, self.index[0].floor(freq))
         return result
+
+
+def modified_median(x):
+    """
+    Return the median if x has an odd number of values
+    if x has an odd number of values, return the lower of median values
+    :param x list: sorted list of objects
+    :return: median
+    """
+    return x[(-1 + x.shape[0]) // 2]
 
 
 def get_resample_indices(date_range, freq):
