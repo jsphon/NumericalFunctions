@@ -266,13 +266,13 @@ class JaggedKeyValueArray(object):
         idx0b = self.bounds[indices[0]+1]
         values0 = self.keys[idx0:idx0b]
 
-        result[0, 0] = values0[(-1 + values0.shape[0]) // 2]
+        result[0, 0] = modified_median(values0)
 
         idx1 = self.bounds[indices[0] + 1]
         idx1b = self.bounds[indices[0] + 2]
         values0b = self.keys[idx1:idx1b]
 
-        result[0, 3] = values0b[(-1+values0b.shape[0])//2]
+        result[0, 3] = modified_median(values0b)
 
         for i in range(len(indices) - 1):
             idx0 = self.bounds[indices[i] + 1]
@@ -286,12 +286,10 @@ class JaggedKeyValueArray(object):
             result[i + 1, 2] = values.min()
 
             values0 = self.keys[idx0:idx0b]
-            median_index = (-1+values0.shape[0])//2
-
-            result[i+1, 0] = values0[median_index]
+            result[i+1, 0] = modified_median(values0)
 
             values1 = self.keys[idx1:idx1b]
-            result[i+1, 3] = values1[(-1+values1.shape[0])//2]
+            result[i+1, 3] = modified_median(values1)
 
         idx = self.bounds[indices[-1] + 1]
         idxb = self.bounds[indices[-1] + 2]
@@ -301,10 +299,10 @@ class JaggedKeyValueArray(object):
         result[-1, 2] = values1.min()
 
         values1b = self.keys[idx:idxb]
-        result[-1, 0] = values1b[(-1 + values1b.shape[0]) // 2]
+        result[-1, 0] = modified_median(values1b)
 
         values1b = self.keys[self.bounds[-1]:]
-        result[-1, 3] = values1b[(-1 + values1b.shape[0]) // 2]
+        result[-1, 3] = modified_median(values1b)
         return result
 
     def get_v(self, freq):
