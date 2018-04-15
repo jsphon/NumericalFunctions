@@ -6,7 +6,6 @@ Created on 1 Aug 2015
 
 
 import datetime
-from operator import is_
 
 import numba as nb
 import pandas as pd
@@ -252,6 +251,58 @@ class JaggedKeyValueArray(object):
             return JaggedKeyValueArray(cs_keys, cs_vals, cs_bounds)
         else:
             return JaggedKeyValueArray([], [], [])
+
+    def get_ohlc(self, freq):
+
+        indices = get_resample_indices(self.index, freq)
+
+        result = np.zeros((len(indices) + 1, 4), dtype=self.values.dtype)
+
+        values0 = self.keys[:indices[0] + 1]
+        result[0, 0] = values0[(-1+values0.shape[0])//2]
+        result[0, 1] = values0.max()
+        result[0, 2] = values0.min()
+
+        idx1 = self.bounds[indices[0] + 1]
+        idx1b = self.bounds[indices[0] + 2]
+        values0b = self.keys[idx1:idx1b]
+
+        med = values0b[(-1+values0b.shape[0])//2]
+
+        result[0, 3] = med
+
+        for i in range(len(indices) - 1):
+            idx0 = self.bounds[indices[i] + 1]
+            idx0b = self.bounds[indices[i+1]]
+
+            idx1 = self.bounds[indices[i + 1] + 1]
+            idx1b = self.bounds[indices[i + 1] + 2]
+
+            values = self.keys[idx0:idx1]
+            result[i + 1, 1] = values.max()
+            result[i + 1, 2] = values.min()
+
+            values0 = self.keys[idx0:idx0b]
+            median_index = (-1+values0.shape[0])//2
+
+            result[i+1, 0] = values0[median_index]
+
+            values1 = self.keys[idx1:idx1b]
+            result[i+1, 3] = values1[(-1+values1.shape[0])//2]
+
+        idx = self.bounds[indices[-1] + 1]
+        idxb = self.bounds[indices[-1] + 2]
+        values1 = self.keys[idx:]
+
+        result[-1, 1] = values1.max()
+        result[-1, 2] = values1.min()
+
+        values1b = self.keys[idx:idxb]
+        result[-1, 0] = values1b[(-1 + values1b.shape[0]) // 2]
+
+        values1b = self.keys[self.bounds[-1]:]
+        result[-1, 3] = values1b[(-1 + values1b.shape[0]) // 2]
+        return result
 
     def get_v(self, freq):
 

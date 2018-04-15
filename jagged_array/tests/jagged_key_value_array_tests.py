@@ -281,12 +281,12 @@ class JaggedKeyValueArrayTests(unittest.TestCase):
 class OHLCTests(unittest.TestCase):
 
     def setUp(self):
-        self.k0 = [11, ]
-        self.k1 = [12, 13]
-        self.k2 = [11, 12, 13]
-        self.k3 = [12, 13, 14]
-        self.k4 = [11, 14, 16]
-        self.k5 = [13, 14, 15]
+        self.k0 = [11, ] # 4
+        self.k1 = [12, 13] # 6
+        self.k2 = [11, 12, 13] # 8
+        self.k3 = [12, 13, 14] # 10
+        self.k4 = [11, 14, 16] # 12
+        self.k5 = [13, 14, 15] # 14
 
         self.v0 = [1, ]
         self.v1 = [2, 3]
@@ -307,6 +307,17 @@ class OHLCTests(unittest.TestCase):
             self.bounds,
             index=self.index
         )
+
+    def test_get_ohlc(self):
+        result = self.arr.get_ohlc('5s')
+        expected = np.array([
+            [11, 11, 11, 12],
+            [12, 13, 11, 13],
+            [13, 16, 11, 14],
+        ])
+
+        print(result)
+        np.testing.assert_array_equal(expected, result)
 
     def test_get_v(self):
         result = self.arr.get_v('5s')
