@@ -329,32 +329,32 @@ class OHLCTests(unittest.TestCase):
 
         np.testing.assert_array_equal(expected, result)
 
-    def test_get_c(self):
-        result = self.arr.get_c('5s')
-        expected = np.array([11, 12, 14])
+    # def test_get_c(self):
+    #     result = self.arr.get_c('5s')
+    #     expected = np.array([11, 12, 14])
+    #
+    #     np.testing.assert_array_equal(expected, result)
 
-        np.testing.assert_array_equal(expected, result)
-
-    def test_get_o(self):
-
-        result = self.arr.get_o('5s')
-        expected = np.array([11, 12, 13])
-
-        np.testing.assert_array_equal(expected, result)
-
-    def test_get_hl(self):
-
-        result = self.arr.get_hl('5s')
-        expected = np.array([[11, 11], [13, 11], [16, 11]])
-
-        np.testing.assert_array_equal(expected, result)
-
-    def test_get_hl(self):
-
-        result = self.arr.get_h('5s')
-        expected = np.array([11, 13, 16])
-
-        np.testing.assert_array_equal(expected, result)
+    # def test_get_o(self):
+    #
+    #     result = self.arr.get_o('5s')
+    #     expected = np.array([11, 12, 13])
+    #
+    #     np.testing.assert_array_equal(expected, result)
+    #
+    # def test_get_hl(self):
+    #
+    #     result = self.arr.get_hl('5s')
+    #     expected = np.array([[11, 11], [13, 11], [16, 11]])
+    #
+    #     np.testing.assert_array_equal(expected, result)
+    #
+    # def test_get_hl(self):
+    #
+    #     result = self.arr.get_h('5s')
+    #     expected = np.array([11, 13, 16])
+    #
+    #     np.testing.assert_array_equal(expected, result)
 
 
 
@@ -431,14 +431,13 @@ class JaggedKeyValueArrayWithDateTimeIndexTests(unittest.TestCase):
 
         np.testing.assert_array_equal(expected, result)
 
-
     def test_get_resample_indices(self):
 
         date_range = pd.date_range('20180101', freq='1s', periods=11)
         print('date_range is %s' % date_range)
         result = mod.get_resample_indices(date_range, freq='5s')
 
-        expected = np.array([4, 9])
+        expected = np.array([0, 5, 10])
         np.testing.assert_array_equal(expected, result)
 
     def test_resample(self):
@@ -460,120 +459,3 @@ class JaggedKeyValueArrayWithDateTimeIndexTests(unittest.TestCase):
         np.testing.assert_array_equal(expected.values, result.values)
         np.testing.assert_array_equal(expected.bounds, result.bounds)
         np.testing.assert_array_equal(expected.index, result.index)
-
-
-
-
-
-        # def test__getitem_1dslice2(self):
-    #     r = self.arr[self.index[1]:]
-    #     print('test__getitem_1dslice: %s' % r)
-    #     self.assertIsInstance(r, JaggedKeyValueArray)
-    #     self.assertEqual(2, len(r))
-    #     self.assertEqual(1, r.bounds[0])
-    #     self.assertEqual(3, r.bounds[1])
-    #     self.assertEqual(6, r.bounds[2])
-    #
-    # def test___getitem__2dslice(self):
-    #     k, v = self.arr[0, 0]
-    #     self.assertEqual(11, k)
-    #     self.assertEqual(1, v)
-    #
-    #     k, v = self.arr[1, 0]
-    #     self.assertEqual(12, k)
-    #     self.assertEqual(2, v)
-    #
-    #     k, v = self.arr[1, -1]
-    #     self.assertEqual(13, k)
-    #     self.assertEqual(3, v)
-    #
-    # def test___getitem__2dslice2(self):
-    #     k, v = self.arr[0, :2]
-    #
-    #     self.assertEqual(self.k0, k)
-    #     self.assertEqual(self.v0, v)
-    #
-    #     k, v = self.arr[1, :1]
-    #
-    #     self.assertEqual(self.k1[:1], k)
-    #     self.assertEqual(self.v1[:1], v)
-    #
-    #     k, v = self.arr[2, 1:]
-    #
-    #     np.testing.assert_array_equal(self.k2[1:], k)
-    #     np.testing.assert_array_equal(self.v2[1:], v)
-    #
-    # def test___getitem__2dslice3(self):
-    #     r = self.arr[:2, -2:]
-    #
-    #     self.assertIsInstance(r, tuple)
-    #
-    #     e0 = np.array([[0., 11.],
-    #                    [12., 13.],
-    #                    [12., 13.]])
-    #     e1 = np.array([[0., 1.],
-    #                    [2., 3.],
-    #                    [5., 6.]])
-    #     # print( r[1] )
-    #     np.testing.assert_equal(e0, r[0])
-    #     np.testing.assert_equal(e1, r[1])
-    #
-    # def test___getitem__2dslice4(self):
-    #     k, v = self.arr[:, -1]
-    #
-    #     expected_keys = np.array([11, 13, 13])
-    #     expected_vals = np.array([1, 3, 6])
-    #
-    #     np.testing.assert_equal(expected_keys, k)
-    #     np.testing.assert_equal(expected_vals, v)
-    #
-    # def test_to_dense(self):
-    #     data, cols = self.arr.to_dense()
-    #     print(data)
-    #     print(cols)
-    #
-    # def test_to_dense2(self):
-    #     keys = [[0], [1, 2, 3], [2, 3]]
-    #     values = [[10], [21, 22, 23], [32, 33]]
-    #
-    #     arr = JaggedKeyValueArray.from_lists(keys, values)
-    #
-    #     data, cols = arr.to_dense()
-    #     print(data)
-    #     print(cols)
-    #
-    # def test_from_dense(self):
-    #     data = [[0, 1, 2],
-    #             [3, 0, 4],
-    #             [0, 5, 0]]
-    #     cols = [10, 20, 30]
-    #
-    #     data = np.array(data)
-    #     cols = np.array(cols)
-    #     r = JaggedKeyValueArray.from_dense(data, cols)
-    #     print(r)
-    #
-    #     e0 = np.array([1, 2, 3, 4, 5])
-    #     e1 = np.array([20, 30, 10, 30, 20])
-    #     e2 = np.array([0, 2, 4, 5])
-    #     np.testing.assert_array_equal(e0, r.values)
-    #     np.testing.assert_array_equal(e1, r.keys)
-    #     np.testing.assert_array_equal(e2, r.bounds)
-    #
-    # def test_from_dense_nb(self):
-    #     data = [[0, 1, 2],
-    #             [3, 0, 4],
-    #             [0, 5, 0]]
-    #     cols = [10, 20, 30]
-    #
-    #     data = np.array(data)
-    #     cols = np.array(cols)
-    #     r = JaggedKeyValueArray.from_dense_nb(data, cols)
-    #     print(r)
-    #
-    #     e0 = np.array([1, 2, 3, 4, 5])
-    #     e1 = np.array([20, 30, 10, 30, 20])
-    #     e2 = np.array([0, 2, 4, 5])
-    #     np.testing.assert_array_equal(e0, r.values)
-    #     np.testing.assert_array_equal(e1, r.keys)
-    #     np.testing.assert_array_equal(e2, r.bounds)

@@ -389,7 +389,7 @@ class JaggedKeyValueArray(object):
         old_row = np.zeros_like(unique_keys, dtype=np.int)
 
         row_diffs = []
-        for i in indices:
+        for i in indices[1:]-1:
             row = data[i]
             row_diff = row-old_row
             row_diffs.append(row_diff)
@@ -403,7 +403,7 @@ class JaggedKeyValueArray(object):
         result = JaggedKeyValueArray.from_dense(diff_data, unique_keys, dtype=np.int)
 
         floored = self.index.floor(freq)
-        result.index = floored[indices+1].insert(0, self.index[0].floor(freq))
+        result.index = floored[indices]
         return result
 
 
@@ -418,6 +418,12 @@ def modified_median(x):
 
 
 def get_resampled_index(date_range, freq):
+    """
+    Return a date_range, resampled
+    :param date_range:
+    :param freq:
+    :return:
+    """
     floored = date_range.floor(freq)
     i1 = np.where(np.diff(floored))[0]+1
     i0 = np.array([0])
@@ -426,11 +432,20 @@ def get_resampled_index(date_range, freq):
 
     return date_range[indices]
 
+
 def get_resample_indices(date_range, freq):
+    """
+    Return the integer indices representing the 1st index of each resampled
+    bin. i.e. the index that would represent the open of an ohlc bar.
+    :param date_range:
+    :param freq:
+    :return:
+    """
     # TODO: Inefficient, date_range.floor also called in parent
     floored = date_range.floor(freq)
-    #print('floored : %s' % str(floored))
-    return np.where(np.diff(floored))[0]
+    i1 = np.where(np.diff(floored))[0] + 1
+    i0 = np.array([0])
+    return np.r_[i0, i1]
 
 
 def is_date_type(x):
