@@ -269,11 +269,13 @@ class JaggedKeyValueArray(object):
 
         indices = get_resample_indices(self.index, freq)
 
-        result = np.zeros((len(indices), 4), dtype=self.values.dtype)
+        result = np.empty((len(indices), 4), dtype=np.float32)
+        result[:] = np.nan
 
         values0 = self.keys[:indices[0] + 1]
-        result[0, 1] = values0.max()
-        result[0, 2] = values0.min()
+        if len(values0):
+            result[0, 1] = values0.max()
+            result[0, 2] = values0.min()
 
         idx0 = self.bounds[indices[0]]
         idx0b = self.bounds[indices[0]+1]
@@ -296,8 +298,9 @@ class JaggedKeyValueArray(object):
 
             # High and Low
             values = self.keys[idx0:idx1]
-            result[i, 1] = values.max()
-            result[i, 2] = values.min()
+            if idx1>idx0:
+                result[i, 1] = values.max()
+                result[i, 2] = values.min()
 
             # Open
             opening_values = self.keys[idx0:idx0b]
@@ -311,8 +314,9 @@ class JaggedKeyValueArray(object):
         idxb = self.bounds[indices[-1] + 1]
         values1 = self.keys[idx:]
 
-        result[-1, 1] = values1.max()
-        result[-1, 2] = values1.min()
+        if len(values1):
+            result[-1, 1] = values1.max()
+            result[-1, 2] = values1.min()
 
         values1b = self.keys[idx:idxb]
         result[-1, 0] = modified_median(values1b)
@@ -334,56 +338,62 @@ class JaggedKeyValueArray(object):
             idx0 = self.bounds[indices[i]]
             idx1 = self.bounds[indices[i + 1]]
 
-            values = self.values[idx0:idx1]
-            result[i] = values.sum()
+            if idx0!=idx1:
+                values = self.values[idx0:idx1]
+                result[i] = values.sum()
+            else:
+                result[i] = 0
 
         idx = self.bounds[indices[-1]]
         values1 = self.values[idx:]
-        result[-1] = values1.sum()
+        if len(values1):
+            result[-1] = values1.sum()
+        else:
+            result[-1] = 0
         return result
 
-    def get_hl(self, freq):
-        resampled = self.resample(freq)
-        result = []
-        for row in resampled.get_keys_array():
-            result.append([np.max(row), np.min(row)])
-        return np.array(result)
-
-    def get_h(self, freq):
-        resampled = self.resample(freq)
-        result = []
-        for row in resampled.get_keys_array():
-            result.append(np.max(row))
-        return np.array(result)
-
-    def get_c(self, freq):
-        indices = get_resample_indices(self.index, freq)
-        keys = self.get_keys_array()
-
-        result = np.ndarray(len(indices)+1, dtype=keys.dtype)
-
-        for c, i in enumerate(indices):
-            row = keys[i]
-            median = row[(-1+row.shape[0])//2]
-            result[c] = median
-
-        row = keys[len(keys)-1]
-        result[-1] = row[(-1+row.shape[0])//2]
-        return result
-
-    def get_o(self, freq):
-        indices = get_resample_indices(self.index, freq)
-        keys = self.get_keys_array()
-
-        result = np.ndarray(len(indices)+1, dtype=keys.dtype)
-
-        row = keys[0]
-        result[0] = row[(-1+row.shape[0])//2]
-        for c, i in enumerate(indices):
-            row = keys[i+1]
-            median = row[(-1+row.shape[0])//2]
-            result[c+1] = median
-        return result
+    # def get_hl(self, freq):
+    #     resampled = self.resample(freq)
+    #     result = []
+    #     for row in resampled.get_keys_array():
+    #         result.append([np.max(row), np.min(row)])
+    #     return np.array(result)
+    #
+    # def get_h(self, freq):
+    #     resampled = self.resample(freq)
+    #     result = []
+    #     for row in resampled.get_keys_array():
+    #         result.append(np.max(row))
+    #     return np.array(result)
+    #
+    # def get_c(self, freq):
+    #     indices = get_resample_indices(self.index, freq)
+    #     keys = self.get_keys_array()
+    #
+    #     result = np.ndarray(len(indices)+1, dtype=keys.dtype)
+    #
+    #     for c, i in enumerate(indices):
+    #         row = keys[i]
+    #         median = row[(-1+row.shape[0])//2]
+    #         result[c] = median
+    #
+    #     row = keys[len(keys)-1]
+    #     result[-1] = row[(-1+row.shape[0])//2]
+    #     return result
+    #
+    # def get_o(self, freq):
+    #     indices = get_resample_indices(self.index, freq)
+    #     keys = self.get_keys_array()
+    #
+    #     result = np.ndarray(len(indices)+1, dtype=keys.dtype)
+    #
+    #     row = keys[0]
+    #     result[0] = row[(-1+row.shape[0])//2]
+    #     for c, i in enumerate(indices):
+    #         row = keys[i+1]
+    #         median = row[(-1+row.shape[0])//2]
+    #         result[c+1] = median
+    #     return result
 
     def resample(self, freq):
         indices = get_resample_indices(self.index, freq)
@@ -419,7 +429,10 @@ def modified_median(x):
     :param x list: sorted list of objects
     :return: median
     """
-    return x[(-1 + x.shape[0]) // 2]
+    if len(x):
+        return x[(-1 + x.shape[0]) // 2]
+    else:
+        return np.nan
 
 
 def get_resampled_index(date_range, freq):
