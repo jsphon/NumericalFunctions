@@ -269,7 +269,7 @@ class JaggedKeyValueArray(object):
 
         indices = get_resample_indices(self.index, freq)
 
-        result = np.zeros((len(indices) + 1, 4), dtype=self.values.dtype)
+        result = np.zeros((len(indices), 4), dtype=self.values.dtype)
 
         values0 = self.keys[:indices[0] + 1]
         result[0, 1] = values0.max()
@@ -287,25 +287,28 @@ class JaggedKeyValueArray(object):
 
         result[0, 3] = modified_median(values0b)
 
-        for i in range(len(indices) - 1):
-            idx0 = self.bounds[indices[i] + 1]
-            idx0b = self.bounds[indices[i+1]]
+        for i in range(1, len(indices) - 1):
+            idx0 = self.bounds[indices[i]]
+            idx0b = self.bounds[indices[i]+1]
 
-            idx1 = self.bounds[indices[i + 1] + 1]
-            idx1b = self.bounds[indices[i + 1] + 2]
+            idx1 = self.bounds[indices[i + 1]]
+            idx1b = self.bounds[indices[i + 1]+1]
 
+            # High and Low
             values = self.keys[idx0:idx1]
-            result[i + 1, 1] = values.max()
-            result[i + 1, 2] = values.min()
+            result[i, 1] = values.max()
+            result[i, 2] = values.min()
 
-            values0 = self.keys[idx0:idx0b]
-            result[i+1, 0] = modified_median(values0)
+            # Open
+            opening_values = self.keys[idx0:idx0b]
+            result[i, 0] = modified_median(opening_values)
 
+            # Close
             values1 = self.keys[idx1:idx1b]
-            result[i+1, 3] = modified_median(values1)
+            result[i, 3] = modified_median(values1)
 
-        idx = self.bounds[indices[-1] + 1]
-        idxb = self.bounds[indices[-1] + 2]
+        idx = self.bounds[indices[-1]]
+        idxb = self.bounds[indices[-1] + 1]
         values1 = self.keys[idx:]
 
         result[-1, 1] = values1.max()
