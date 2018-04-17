@@ -252,6 +252,19 @@ class JaggedKeyValueArray(object):
         else:
             return JaggedKeyValueArray([], [], [])
 
+    def get_ohlcv_frame(self, freq):
+        indices = get_resample_indices(self.index, freq)
+        ohlc = self.get_ohlc(freq)
+        v = self.get_v(freq)
+        index = self.index[indices]
+        print(indices)
+        df = pd.DataFrame(
+            ohlc,
+            index=index,
+            columns=['o', 'h', 'l', 'c']
+        )
+        return df
+
     def get_ohlc(self, freq):
 
         indices = get_resample_indices(self.index, freq)
@@ -403,6 +416,15 @@ def modified_median(x):
     """
     return x[(-1 + x.shape[0]) // 2]
 
+
+def get_resampled_index(date_range, freq):
+    floored = date_range.floor(freq)
+    i1 = np.where(np.diff(floored))[0]+1
+    i0 = np.array([0])
+
+    indices = np.r_[i0, i1]
+
+    return date_range[indices]
 
 def get_resample_indices(date_range, freq):
     # TODO: Inefficient, date_range.floor also called in parent

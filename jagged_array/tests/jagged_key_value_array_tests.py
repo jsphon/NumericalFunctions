@@ -308,6 +308,10 @@ class OHLCTests(unittest.TestCase):
             index=self.index
         )
 
+    def xtest_get_ohlcv_frame(self):
+        result = self.arr.get_ohlcv_frame('5s')
+        print(result)
+
     def test_get_ohlc(self):
         result = self.arr.get_ohlc('5s')
         expected = np.array([
@@ -416,10 +420,22 @@ class JaggedKeyValueArrayWithDateTimeIndexTests(unittest.TestCase):
         self.assertEqual(0, r.bounds[0])
         self.assertEqual(1, r.bounds[1])
 
+    def test_get_resampled_index(self):
+
+        date_range = pd.date_range('20180101', freq='1s', periods=11)
+        print('date_range is %s' % date_range)
+
+        result = mod.get_resampled_index(date_range, freq='5s')
+
+        expected = pd.date_range('20180101', freq='5s', periods=3)
+
+        np.testing.assert_array_equal(expected, result)
+
+
     def test_get_resample_indices(self):
 
         date_range = pd.date_range('20180101', freq='1s', periods=11)
-
+        print('date_range is %s' % date_range)
         result = mod.get_resample_indices(date_range, freq='5s')
 
         expected = np.array([4, 9])
