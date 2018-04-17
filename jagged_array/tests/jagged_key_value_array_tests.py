@@ -308,9 +308,18 @@ class OHLCTests(unittest.TestCase):
             index=self.index
         )
 
-    def xtest_get_ohlcv_frame(self):
+    def test_get_ohlcv_frame(self):
         result = self.arr.get_ohlcv_frame('5s')
         print(result)
+
+        expected_index = pd.date_range('2018-01-01 00:00:00', freq='5s', periods=3)
+        expected_values = [[11.0, 11.0, 11.0, 12.0, 1.0],
+                [12.0, 13.0, 11.0, 13.0, 20.0],
+                [13.0, 16.0, 11.0, 14.0, 103.0]]
+
+        np.testing.assert_array_equal(expected_values, result.values)
+        np.testing.assert_array_equal(['o', 'h', 'l', 'c', 'v'], result.columns)
+        np.testing.assert_array_equal(expected_index, result.index)
 
     def test_get_ohlc(self):
         result = self.arr.get_ohlc('5s')

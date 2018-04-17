@@ -254,15 +254,15 @@ class JaggedKeyValueArray(object):
 
     def get_ohlcv_frame(self, freq):
         indices = get_resample_indices(self.index, freq)
+        resampled_index = get_resampled_index(self.index, freq)
         ohlc = self.get_ohlc(freq)
         v = self.get_v(freq)
-        index = self.index[indices]
-        print(indices)
         df = pd.DataFrame(
             ohlc,
-            index=index,
+            index=resampled_index,
             columns=['o', 'h', 'l', 'c']
         )
+        df['v'] = v
         return df
 
     def get_ohlc(self, freq):
@@ -435,7 +435,7 @@ def get_resampled_index(date_range, freq):
 
     indices = np.r_[i0, i1]
 
-    return date_range[indices]
+    return floored[indices]
 
 
 def get_resample_indices(date_range, freq):
