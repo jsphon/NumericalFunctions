@@ -325,17 +325,19 @@ class JaggedKeyValueArray(object):
 
         indices = get_resample_indices(self.index, freq)
 
-        result = np.ndarray(len(indices)+1, dtype=self.values.dtype)
-        values0 = self.values[:indices[0]+1]
+        result = np.ndarray(len(indices), dtype=self.values.dtype)
+        values0 = self.values[:indices[1]]
         result[0] = values0.sum()
 
-        for i in range(len(indices)-1):
-            idx0 = self.bounds[indices[i]+1]
-            idx1 = self.bounds[indices[i+1]+1]
-            values = self.values[idx0:idx1]
-            result[i+1] = values.sum()
+        for i in range(1, len(indices)-1):
 
-        idx = self.bounds[indices[-1]+1]
+            idx0 = self.bounds[indices[i]]
+            idx1 = self.bounds[indices[i + 1]]
+
+            values = self.values[idx0:idx1]
+            result[i] = values.sum()
+
+        idx = self.bounds[indices[-1]]
         values1 = self.values[idx:]
         result[-1] = values1.sum()
         return result
