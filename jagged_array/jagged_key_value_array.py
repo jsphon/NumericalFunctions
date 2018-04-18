@@ -253,7 +253,6 @@ class JaggedKeyValueArray(object):
             return JaggedKeyValueArray([], [], [])
 
     def get_ohlcv_frame(self, freq):
-        indices = get_resample_indices(self.index, freq)
         resampled_index = get_resampled_index(self.index, freq)
         ohlc = self.get_ohlc(freq)
         v = self.get_v(freq)
@@ -279,22 +278,23 @@ class JaggedKeyValueArray(object):
 
         idx0 = self.bounds[indices[0]]
         idx0b = self.bounds[indices[0]+1]
-        values0 = self.keys[idx0:idx0b]
+        opening_values = self.keys[idx0:idx0b]
 
-        result[0, 0] = modified_median(values0)
+        result[0, 0] = modified_median(opening_values)
 
-        idx1 = self.bounds[indices[0] + 1]
-        idx1b = self.bounds[indices[0] + 2]
-        values0b = self.keys[idx1:idx1b]
+        closing_index0 = self.bounds[indices[1]-1]
+        closing_index1 = self.bounds[indices[1]]
+        closing_values = self.keys[closing_index0:closing_index1]
+        #print('closing values are %s' % str(closing_values))
 
-        result[0, 3] = modified_median(values0b)
+        result[0, 3] = modified_median(closing_values)
 
         for i in range(1, len(indices) - 1):
             idx0 = self.bounds[indices[i]]
             idx0b = self.bounds[indices[i]+1]
 
             idx1 = self.bounds[indices[i + 1]]
-            idx1b = self.bounds[indices[i + 1]+1]
+            #idx1b = self.bounds[indices[i + 1]+1]
 
             # High and Low
             values = self.keys[idx0:idx1]
@@ -307,8 +307,11 @@ class JaggedKeyValueArray(object):
             result[i, 0] = modified_median(opening_values)
 
             # Close
-            values1 = self.keys[idx1:idx1b]
-            result[i, 3] = modified_median(values1)
+            closing_index0 = self.bounds[indices[i+1] - 1]
+            closing_index1 = self.bounds[indices[i+1]]
+            closing_values = self.keys[closing_index0:closing_index1]
+            print('closing values %i:%i are %s' % (closing_index0, closing_index1, str(closing_values)))
+            result[i, 3] = modified_median(closing_values)
 
         idx = self.bounds[indices[-1]]
         idxb = self.bounds[indices[-1] + 1]
@@ -321,8 +324,9 @@ class JaggedKeyValueArray(object):
         values1b = self.keys[idx:idxb]
         result[-1, 0] = modified_median(values1b)
 
-        values1b = self.keys[self.bounds[-1]:]
-        result[-1, 3] = modified_median(values1b)
+        closing_values = self.keys[self.bounds[-2]:self.bounds[-1]]
+        print('closing values are %s' % str(closing_values))
+        result[-1, 3] = modified_median(closing_values)
         return result
 
     def get_v(self, freq):
