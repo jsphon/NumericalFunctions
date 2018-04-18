@@ -299,6 +299,9 @@ class JaggedKeyValueArray(object):
             if idx1>idx0:
                 result[i, 1] = values.max()
                 result[i, 2] = values.min()
+            else:
+                result[i, 1] = np.nan
+                result[i, 2] = np.nan
 
             # Open
             opening_values = self.keys[idx0:idx0b]
