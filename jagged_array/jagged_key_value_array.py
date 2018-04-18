@@ -285,7 +285,6 @@ class JaggedKeyValueArray(object):
         closing_index0 = self.bounds[indices[1]-1]
         closing_index1 = self.bounds[indices[1]]
         closing_values = self.keys[closing_index0:closing_index1]
-        #print('closing values are %s' % str(closing_values))
 
         result[0, 3] = modified_median(closing_values)
 
@@ -294,7 +293,6 @@ class JaggedKeyValueArray(object):
             idx0b = self.bounds[indices[i]+1]
 
             idx1 = self.bounds[indices[i + 1]]
-            #idx1b = self.bounds[indices[i + 1]+1]
 
             # High and Low
             values = self.keys[idx0:idx1]
@@ -310,7 +308,6 @@ class JaggedKeyValueArray(object):
             closing_index0 = self.bounds[indices[i+1] - 1]
             closing_index1 = self.bounds[indices[i+1]]
             closing_values = self.keys[closing_index0:closing_index1]
-            print('closing values %i:%i are %s' % (closing_index0, closing_index1, str(closing_values)))
             result[i, 3] = modified_median(closing_values)
 
         idx = self.bounds[indices[-1]]
@@ -325,7 +322,6 @@ class JaggedKeyValueArray(object):
         result[-1, 0] = modified_median(values1b)
 
         closing_values = self.keys[self.bounds[-2]:self.bounds[-1]]
-        print('closing values are %s' % str(closing_values))
         result[-1, 3] = modified_median(closing_values)
         return result
 
