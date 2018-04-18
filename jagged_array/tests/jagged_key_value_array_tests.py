@@ -357,12 +357,12 @@ class OHLCTests3(unittest.TestCase):
 class OHLCTests3(unittest.TestCase):
 
     def setUp(self):
-        self.keys = [580, 590, 600, 620, 640, 660, 680, 700, 720, 740, 760, 780, 800, 820, 840]
-        self.vals = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+        self.keys = [580, 590]#, 600]
+        self.vals = [0, 1]#, 2]
 
-        self.bounds = [0, 15, 15]
+        self.bounds = [0, 2, 2]
 
-        self.index = pd.date_range('2018-01-01 00:00:00', freq='5s', periods=3)
+        self.index = pd.date_range('2018-01-01 00:00:00', freq='5s', periods=2)
         self.arr = JaggedKeyValueArray(
             self.keys,
             self.vals,
@@ -383,6 +383,9 @@ class OHLCTests3(unittest.TestCase):
         # np.testing.assert_array_equal(['o', 'h', 'l', 'c', 'v'], result.columns)
         # np.testing.assert_array_equal(expected_index, result.index)
 
+    def test_get_v(self):
+        v = self.arr.get_v('5s')
+        print(v)
 
 
 

@@ -271,32 +271,38 @@ class JaggedKeyValueArray(object):
         result = np.empty((len(indices), 4), dtype=np.float32)
         result[:] = np.nan
 
-        values0 = self.keys[:indices[0] + 1]
-        if len(values0):
-            result[0, 1] = values0.max()
-            result[0, 2] = values0.min()
+        # values0 = self.keys[:indices[0] + 1]
+        # if len(values0):
+        #     result[0, 1] = values0.max()
+        #     result[0, 2] = values0.min()
+        #
+        # open_index0 = self.bounds[indices[0]]
+        # open_index1 = self.bounds[indices[0]+1]
+        # opening_values = self.keys[open_index0:open_index1]
+        #
+        # result[0, 0] = modified_median(opening_values)
+        #
+        # closing_index0 = self.bounds[indices[1]-1]
+        # closing_index1 = self.bounds[indices[1]]
+        # closing_values = self.keys[closing_index0:closing_index1]
+        #
+        # result[0, 3] = modified_median(closing_values)
 
-        idx0 = self.bounds[indices[0]]
-        idx0b = self.bounds[indices[0]+1]
-        opening_values = self.keys[idx0:idx0b]
+        extended_indices = np.append(indices, len(self.bounds)-1)
+        print('extended indices %s' % str(extended_indices))
+        for i in range(0, len(indices)):
+            print('i is %s' % i)
+            open_index0 = self.bounds[extended_indices[i]]
+            open_index1 = self.bounds[extended_indices[i]+1]
 
-        result[0, 0] = modified_median(opening_values)
+            print('Open values will be from slice %i:%i'%(open_index0, open_index1))
 
-        closing_index0 = self.bounds[indices[1]-1]
-        closing_index1 = self.bounds[indices[1]]
-        closing_values = self.keys[closing_index0:closing_index1]
-
-        result[0, 3] = modified_median(closing_values)
-
-        for i in range(1, len(indices) - 1):
-            idx0 = self.bounds[indices[i]]
-            idx0b = self.bounds[indices[i]+1]
-
-            idx1 = self.bounds[indices[i + 1]]
+            closing_index0 = self.bounds[extended_indices[i + 1]-1]
+            closing_index1 = self.bounds[extended_indices[i + 1]]
 
             # High and Low
-            values = self.keys[idx0:idx1]
-            if idx1>idx0:
+            values = self.keys[open_index0:closing_index1]
+            if closing_index1>open_index0:
                 result[i, 1] = values.max()
                 result[i, 2] = values.min()
             else:
@@ -304,28 +310,28 @@ class JaggedKeyValueArray(object):
                 result[i, 2] = np.nan
 
             # Open
-            opening_values = self.keys[idx0:idx0b]
+            opening_values = self.keys[open_index0:open_index1]
             result[i, 0] = modified_median(opening_values)
 
             # Close
-            closing_index0 = self.bounds[indices[i+1] - 1]
-            closing_index1 = self.bounds[indices[i+1]]
+            #closing_index0 = self.bounds[indices[i+1] - 1]
+            #closing_index1 = self.bounds[indices[i+1]]
             closing_values = self.keys[closing_index0:closing_index1]
             result[i, 3] = modified_median(closing_values)
 
-        idx = self.bounds[indices[-1]]
-        idxb = self.bounds[indices[-1] + 1]
-        values1 = self.keys[idx:]
-
-        if len(values1):
-            result[-1, 1] = values1.max()
-            result[-1, 2] = values1.min()
-
-        values1b = self.keys[idx:idxb]
-        result[-1, 0] = modified_median(values1b)
-
-        closing_values = self.keys[self.bounds[-2]:self.bounds[-1]]
-        result[-1, 3] = modified_median(closing_values)
+        # index0 = self.bounds[indices[-2]]
+        # index1 = self.bounds[indices[-1]]
+        # all_final_values = self.keys[index0:index1]
+        #
+        # if len(all_final_values):
+        #     result[-1, 1] = all_final_values.max()
+        #     result[-1, 2] = all_final_values.min()
+        #
+        # values1b = self.keys[open_index0:open_index1]
+        # result[-1, 0] = modified_median(values1b)
+        #
+        # closing_values = self.keys[self.bounds[-2]:self.bounds[-1]]
+        # result[-1, 3] = modified_median(closing_values)
         return result
 
     def get_v(self, freq):
