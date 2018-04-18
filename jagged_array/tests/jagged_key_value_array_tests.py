@@ -354,6 +354,37 @@ class OHLCTests3(unittest.TestCase):
         np.testing.assert_array_equal(expected_index, result.index)
 
 
+class OHLCTests3(unittest.TestCase):
+
+    def setUp(self):
+        self.keys = [580, 590, 600, 620, 640, 660, 680, 700, 720, 740, 760, 780, 800, 820, 840]
+        self.vals = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+
+        self.bounds = [0, 15, 15]
+
+        self.index = pd.date_range('2018-01-01 00:00:00', freq='5s', periods=3)
+        self.arr = JaggedKeyValueArray(
+            self.keys,
+            self.vals,
+            self.bounds,
+            index=self.index
+        )
+
+    def test_get_ohlcv_frame(self):
+        result = self.arr.get_ohlcv_frame('5s')
+        print(result)
+        #
+        # expected_index = pd.date_range('2018-01-01 00:00:00', freq='5s', periods=3)
+        # expected_values = [[11.0, 11.0, 11.0, 11.0, 1.0],
+        #         [np.nan, np.nan, np.nan, np.nan, 0.0],
+        #         [14.0, 15.0, 13.0, 14.0, 15.0]]
+
+        # np.testing.assert_array_equal(expected_values, result.values)
+        # np.testing.assert_array_equal(['o', 'h', 'l', 'c', 'v'], result.columns)
+        # np.testing.assert_array_equal(expected_index, result.index)
+
+
+
 
 class OHLCTests(unittest.TestCase):
     def setUp(self):
