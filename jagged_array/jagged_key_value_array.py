@@ -271,13 +271,16 @@ class JaggedKeyValueArray(object):
         result = np.empty((len(indices), 4), dtype=np.float32)
         result[:] = np.nan
 
-        extended_indices = np.append(indices, len(self.bounds)-1)
+        extended_indices = np.append(indices, len(self.bounds))
+        extended_bounds = np.append(self.bounds, len(self.values))
         for i in range(0, len(indices)):
-            open_index0 = self.bounds[extended_indices[i]]
-            open_index1 = self.bounds[extended_indices[i]+1]
+            open_index0 = extended_bounds[extended_indices[i]]
+            open_index1 = extended_bounds[extended_indices[i]+1]
 
-            closing_index0 = self.bounds[extended_indices[i + 1]-1]
-            closing_index1 = self.bounds[extended_indices[i + 1]]
+            closing_index0 = extended_bounds[extended_indices[i + 1]-1]
+            closing_index1 = extended_bounds[extended_indices[i + 1]]
+
+            print('c0/c1 %i/%i' % (closing_index0, closing_index1))
 
             # High and Low
             values = self.keys[open_index0:closing_index1]
@@ -295,6 +298,36 @@ class JaggedKeyValueArray(object):
             # Close
             closing_values = self.keys[closing_index0:closing_index1]
             result[i, 3] = modified_median(closing_values)
+
+        return result
+
+    def get_resample_index_bounds(self, freq):
+        """
+        Return a matrix of indices used for resampling
+
+
+        columns represent (open0, open1, close0, close1)
+        :param date_range:
+        :param freq:
+        :return:
+        """
+
+        floored = self.index.floor(freq)
+        i1 = np.where(np.diff(floored))[0] + 1
+        i0 = np.array([0])
+        open_bound_start_indices = np.r_[i0, i1]
+        open_bound_end_indices = open_bound_start_indices+1
+
+        close_bound_start_indices = open_bound_start_indices[1:]-1
+        close_bound_end_indices = close_bound_start_indices + 1
+
+        result = np.empty((len(open_bound_start_indices), 4))
+        result[:, 0] = self.bounds[open_bound_start_indices]
+        result[:, 1] = self.bounds[open_bound_end_indices]
+        result[:-1, 2] = self.bounds[close_bound_start_indices]
+        result[-1, 2] = self.bounds[-2]
+        result[:-1, 3] = self.bounds[close_bound_end_indices]
+        result[-1, 3] = self.bounds[-1]
 
         return result
 

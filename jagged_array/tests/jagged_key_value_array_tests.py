@@ -315,6 +315,29 @@ class OHLCTests2(unittest.TestCase):
         np.testing.assert_array_equal(['o', 'h', 'l', 'c', 'v'], result.columns)
         np.testing.assert_array_equal(expected_index, result.index)
 
+    def test_get_resample_index_bounds(self):
+        result = self.arr.get_resample_index_bounds('5s')
+
+        np.testing.assert_array_equal(
+            np.array([0, 1, 3]),
+            result[:, 0]
+        )
+
+        np.testing.assert_array_equal(
+            np.array([1, 3, 6]),
+            result[:, 1]
+        )
+
+        np.testing.assert_array_equal(
+            np.array([0, 1, 3]),
+            result[:, 2]
+        )
+
+        np.testing.assert_array_equal(
+            np.array([1, 3, 6]),
+            result[:, 3]
+        )
+
 
 class OHLCTests3(unittest.TestCase):
 
@@ -339,6 +362,16 @@ class OHLCTests3(unittest.TestCase):
             self.bounds,
             index=self.index
         )
+
+    def test_get_resample_index_bounds(self):
+        result = self.arr.get_resample_index_bounds('5s')
+        expected = np.array([
+            [0, 1, 0, 1],
+            [1, 1, 1, 1],
+            [1, 5, 1, 5],
+        ])
+
+        np.testing.assert_array_equal(expected, result)
 
     def test_get_ohlcv_frame(self):
         result = self.arr.get_ohlcv_frame('5s')
@@ -370,6 +403,15 @@ class OHLCTests3(unittest.TestCase):
             index=self.index
         )
 
+    def test_get_resample_index_bounds(self):
+        result = self.arr.get_resample_index_bounds('5s')
+
+        expected = np.array([
+            [0, 2, 0, 2],
+            [2, 2, 2, 2], # empty
+        ])
+        np.testing.assert_array_equal(expected, result)
+
     def test_get_ohlcv_frame(self):
         result = self.arr.get_ohlcv_frame('5s')
         print(result)
@@ -393,10 +435,10 @@ class OHLCTests(unittest.TestCase):
     def setUp(self):
         self.k0 = [11, ]  # 4
         self.k1 = [12, 13]  # 6
-        self.k2 = [11, 12, 13]  # 8
-        self.k3 = [12, 13, 14]  # 10
-        self.k4 = [11, 14, 16]  # 12
-        self.k5 = [13, 14, 15]  # 14
+        self.k2 = [14, 15, 16]  # 8
+        self.k3 = [17, 18, 19]  # 10
+        self.k4 = [20, 21, 22]  # 12
+        self.k5 = [23, 24, 25]  # 14
 
         self.v0 = [1, ]
         self.v1 = [2, 3]
@@ -408,7 +450,7 @@ class OHLCTests(unittest.TestCase):
         self.keys = self.k0 + self.k1 + self.k2 + self.k3 + self.k4 + self.k5  # + self.k6
         self.vals = self.v0 + self.v1 + self.v2 + self.v3 + self.v4 + self.v5  # + self.v6
 
-        self.bounds = [0, 1, 3, 6, 9, 12]
+        self.bounds = [0, 1, 3, 6, 9, 12, 15]
 
         self.index = pd.date_range('2018-01-01 00:00:04', freq='2s', periods=6)
         self.arr = JaggedKeyValueArray(
@@ -418,14 +460,24 @@ class OHLCTests(unittest.TestCase):
             index=self.index
         )
 
+    def test_get_resample_index_bounds(self):
+        result = self.arr.get_resample_index_bounds('5s')
+
+        expected = np.array([
+            [0, 1, 0, 1],
+            [1, 3, 3, 6],
+            [6, 9, 12, 15],
+        ])
+        np.testing.assert_array_equal(expected, result)
+
     def test_get_ohlcv_frame(self):
         result = self.arr.get_ohlcv_frame('5s')
         print(result)
 
         expected_index = pd.date_range('2018-01-01 00:00:00', freq='5s', periods=3)
         expected_values = [[11.0, 11.0, 11.0, 11.0, 1.0],
-                           [12.0, 13.0, 11.0, 12.0, 20.0],
-                           [13.0, 16.0, 11.0, 14.0, 103.0]]
+                           [12.0, 16.0, 12.0, 15.0, 20.0],
+                           [18.0, 25.0, 17.0, 24.0, 103.0]]
 
         np.testing.assert_array_equal(expected_values, result.values)
         np.testing.assert_array_equal(['o', 'h', 'l', 'c', 'v'], result.columns)
