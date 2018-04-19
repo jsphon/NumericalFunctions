@@ -460,6 +460,17 @@ class OHLCTests(unittest.TestCase):
             index=self.index
         )
 
+    def test_get_ohlc(self):
+        result = self.arr.get_ohlc('5s')
+        expected = np.array([
+            [11, 11, 11, 11],
+            [12, 16, 12, 15],
+            [18, 25, 17, 24],
+        ])
+
+        print(result)
+        np.testing.assert_array_equal(expected, result)
+
     def test_get_resample_index_bounds(self):
         result = self.arr.get_resample_index_bounds('5s')
 
@@ -482,17 +493,6 @@ class OHLCTests(unittest.TestCase):
         np.testing.assert_array_equal(expected_values, result.values)
         np.testing.assert_array_equal(['o', 'h', 'l', 'c', 'v'], result.columns)
         np.testing.assert_array_equal(expected_index, result.index)
-
-    def test_get_ohlc(self):
-        result = self.arr.get_ohlc('5s')
-        expected = np.array([
-            [11, 11, 11, 11],
-            [12, 13, 11, 12],
-            [13, 16, 11, 14],
-        ])
-
-        print(result)
-        np.testing.assert_array_equal(expected, result)
 
     def test_get_v(self):
         result = self.arr.get_v('5s')

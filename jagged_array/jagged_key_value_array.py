@@ -265,38 +265,39 @@ class JaggedKeyValueArray(object):
         return df
 
     def get_ohlc(self, freq):
+        """
+        Convert this array into Open/High/Low/Close bars
+        :param freq:
+        :return:
+        """
 
-        indices = get_resample_indices(self.index, freq)
+        resampled_bounds = self.get_resample_index_bounds(freq)
 
-        result = np.empty((len(indices), 4), dtype=np.float32)
+        result = np.empty((len(resampled_bounds), 4), dtype=self.values.dtype)
         result[:] = np.nan
 
-        extended_indices = np.append(indices, len(self.bounds))
-        extended_bounds = np.append(self.bounds, len(self.values))
-        for i in range(0, len(indices)):
-            open_index0 = extended_bounds[extended_indices[i]]
-            open_index1 = extended_bounds[extended_indices[i]+1]
+        for i in range(0, len(resampled_bounds)):
 
-            closing_index0 = extended_bounds[extended_indices[i + 1]-1]
-            closing_index1 = extended_bounds[extended_indices[i + 1]]
-
-            print('c0/c1 %i/%i' % (closing_index0, closing_index1))
+            open0 = resampled_bounds[i, 0]
+            open1 = resampled_bounds[i, 1]
+            close0 = resampled_bounds[i,2]
+            close1 = resampled_bounds[i, 3]
 
             # High and Low
-            values = self.keys[open_index0:closing_index1]
-            if closing_index1>open_index0:
-                result[i, 1] = values.max()
-                result[i, 2] = values.min()
+            all_values = self.keys[open0:close1]
+            if close1>open0:
+                result[i, 1] = all_values.max()
+                result[i, 2] = all_values.min()
             else:
                 result[i, 1] = np.nan
                 result[i, 2] = np.nan
 
             # Open
-            opening_values = self.keys[open_index0:open_index1]
+            opening_values = self.keys[open0:open1]
             result[i, 0] = modified_median(opening_values)
 
             # Close
-            closing_values = self.keys[closing_index0:closing_index1]
+            closing_values = self.keys[close0:close1]
             result[i, 3] = modified_median(closing_values)
 
         return result
@@ -321,7 +322,7 @@ class JaggedKeyValueArray(object):
         close_bound_start_indices = open_bound_start_indices[1:]-1
         close_bound_end_indices = close_bound_start_indices + 1
 
-        result = np.empty((len(open_bound_start_indices), 4))
+        result = np.empty((len(open_bound_start_indices), 4), dtype=np.int)
         result[:, 0] = self.bounds[open_bound_start_indices]
         result[:, 1] = self.bounds[open_bound_end_indices]
         result[:-1, 2] = self.bounds[close_bound_start_indices]
