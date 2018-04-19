@@ -500,34 +500,6 @@ class OHLCTests(unittest.TestCase):
 
         np.testing.assert_array_equal(expected, result)
 
-    # def test_get_c(self):
-    #     result = self.arr.get_c('5s')
-    #     expected = np.array([11, 12, 14])
-    #
-    #     np.testing.assert_array_equal(expected, result)
-
-    # def test_get_o(self):
-    #
-    #     result = self.arr.get_o('5s')
-    #     expected = np.array([11, 12, 13])
-    #
-    #     np.testing.assert_array_equal(expected, result)
-    #
-    # def test_get_hl(self):
-    #
-    #     result = self.arr.get_hl('5s')
-    #     expected = np.array([[11, 11], [13, 11], [16, 11]])
-    #
-    #     np.testing.assert_array_equal(expected, result)
-    #
-    # def test_get_hl(self):
-    #
-    #     result = self.arr.get_h('5s')
-    #     expected = np.array([11, 13, 16])
-    #
-    #     np.testing.assert_array_equal(expected, result)
-
-
 
 class JaggedKeyValueArrayWithDateTimeIndexTests(unittest.TestCase):
     def setUp(self):
