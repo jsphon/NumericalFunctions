@@ -273,7 +273,8 @@ class JaggedKeyValueArray(object):
 
         resampled_bounds = self.get_resample_index_bounds(freq)
 
-        result = np.empty((len(resampled_bounds), 4), dtype=self.values.dtype)
+        # Needs to be a float so that we can have nans
+        result = np.empty((len(resampled_bounds), 4), dtype=np.float)
         result[:] = np.nan
 
         for i in range(0, len(resampled_bounds)):
@@ -301,6 +302,16 @@ class JaggedKeyValueArray(object):
             result[i, 3] = modified_median(closing_values)
 
         return result
+
+    def get_active_keys(self):
+        """
+        Return the keys that are used by a jagged array
+
+        This is required, as if an array is a view of another, then some
+        of the keys could be unused
+        """
+        all_keys = self.keys[self.bounds[0]:self.bounds[-1]]
+        return np.unique(all_keys)
 
     def get_resample_index_bounds(self, freq):
         """
