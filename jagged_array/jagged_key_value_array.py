@@ -6,6 +6,7 @@ Created on 1 Aug 2015
 
 
 import datetime
+from collections import defaultdict
 
 import numba as nb
 import pandas as pd
@@ -83,6 +84,12 @@ class JaggedKeyValueArray(object):
             bounds.append(len(row_cols))
 
         return JaggedKeyValueArray.from_lists(keys, values)
+
+    def get_histogram(self):
+        result = defaultdict(int)
+        for i in range(self.bounds[0], self.bounds[-1]):
+            result[self.keys[i]] += self.values[i]
+        return result
 
     def __bool__(self):
         return bool(self.keys.shape[0])

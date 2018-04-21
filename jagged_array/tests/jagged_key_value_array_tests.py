@@ -8,7 +8,6 @@ import jagged_array.jagged_key_value_array as mod
 
 
 class MoreJaggedKeyValueArrayTests(unittest.TestCase):
-
     def test_to_dense_slice_from_beginning(self):
         ''' Check that it works when the bounds start before/after the end'''
         k0 = [10, 11]
@@ -60,7 +59,6 @@ class MoreJaggedKeyValueArrayTests(unittest.TestCase):
         np.testing.assert_array_equal(expected_k, k)
 
     def test_get_active_keys(self):
-
         keys = [0, 1, 2, 3, 4, 5]
         vals = [10, 11, 12, 13, 15]
 
@@ -89,6 +87,15 @@ class JaggedKeyValueArrayTests(unittest.TestCase):
         self.bounds = [0, 1, 3, 6]
 
         self.arr = JaggedKeyValueArray(self.keys, self.vals, self.bounds)
+
+    def test_get_histogram(self):
+        result = self.arr.get_histogram()
+        expected = {
+            11: 5,
+            12: 7,
+            13: 9
+        }
+        self.assertEqual(expected, result)
 
     def test___bool__(self):
         self.assertTrue(bool(self.arr))
@@ -292,11 +299,10 @@ class JaggedKeyValueArrayTests(unittest.TestCase):
 
 
 class OHLCTests2(unittest.TestCase):
-
     def setUp(self):
-        self.k0 = [11, ] # 4
-        self.k1 = [12, 13] # 6
-        self.k2 = [13, 14, 15] # 8
+        self.k0 = [11, ]  # 4
+        self.k1 = [12, 13]  # 6
+        self.k2 = [13, 14, 15]  # 8
 
         self.v0 = [1, ]
         self.v1 = [2, 3]
@@ -321,8 +327,8 @@ class OHLCTests2(unittest.TestCase):
 
         expected_index = pd.date_range('2018-01-01 00:00:00', freq='5s', periods=3)
         expected_values = [[11.0, 11.0, 11.0, 11.0, 1.0],
-                [12.0, 13.0, 12.0, 12.0, 5.0],
-                [14.0, 15.0, 13.0, 14.0, 15.0]]
+                           [12.0, 13.0, 12.0, 12.0, 5.0],
+                           [14.0, 15.0, 13.0, 14.0, 15.0]]
 
         np.testing.assert_array_equal(expected_values, result.values)
         np.testing.assert_array_equal(['o', 'h', 'l', 'c', 'v'], result.columns)
@@ -353,7 +359,6 @@ class OHLCTests2(unittest.TestCase):
 
 
 class OHLCTests3(unittest.TestCase):
-
     def setUp(self):
         self.k0 = [11]
         self.k1 = []
@@ -392,8 +397,8 @@ class OHLCTests3(unittest.TestCase):
 
         expected_index = pd.date_range('2018-01-01 00:00:00', freq='5s', periods=3)
         expected_values = [[11.0, 11.0, 11.0, 11.0, 1.0],
-                [np.nan, np.nan, np.nan, np.nan, 0.0],
-                [14.0, 15.0, 13.0, 14.0, 15.0]]
+                           [np.nan, np.nan, np.nan, np.nan, 0.0],
+                           [14.0, 15.0, 13.0, 14.0, 15.0]]
 
         np.testing.assert_array_equal(expected_values, result.values)
         np.testing.assert_array_equal(['o', 'h', 'l', 'c', 'v'], result.columns)
@@ -401,10 +406,9 @@ class OHLCTests3(unittest.TestCase):
 
 
 class OHLCTests3(unittest.TestCase):
-
     def setUp(self):
-        self.keys = [580, 590]#, 600]
-        self.vals = [1, 2]#, 2]
+        self.keys = [580, 590]  # , 600]
+        self.vals = [1, 2]  # , 2]
 
         self.bounds = [0, 2, 2]
 
@@ -421,7 +425,7 @@ class OHLCTests3(unittest.TestCase):
 
         expected = np.array([
             [0, 2, 0, 2],
-            [2, 2, 2, 2], # empty
+            [2, 2, 2, 2],  # empty
         ])
         np.testing.assert_array_equal(expected, result)
 
@@ -431,7 +435,7 @@ class OHLCTests3(unittest.TestCase):
 
         expected_index = pd.date_range('2018-01-01 00:00:00', freq='5s', periods=2)
         expected_values = [[580.0, 590.0, 580.0, 580.0, 3.0],
-                [np.nan, np.nan, np.nan, np.nan, 0.0]]
+                           [np.nan, np.nan, np.nan, np.nan, 0.0]]
 
         np.testing.assert_array_equal(expected_values, result.values)
         np.testing.assert_array_equal(['o', 'h', 'l', 'c', 'v'], result.columns)
@@ -577,7 +581,6 @@ class JaggedKeyValueArrayWithDateTimeIndexTests(unittest.TestCase):
         self.assertEqual(1, r.bounds[1])
 
     def test_get_resampled_index(self):
-
         date_range = pd.date_range('20180101', freq='1s', periods=11)
         print('date_range is %s' % date_range)
 
@@ -597,7 +600,6 @@ class JaggedKeyValueArrayWithDateTimeIndexTests(unittest.TestCase):
         np.testing.assert_array_equal(date_range, result)
 
     def test_get_resample_indices(self):
-
         date_range = pd.date_range('20180101', freq='1s', periods=11)
         print('date_range is %s' % date_range)
         result = mod.get_resample_indices(date_range, freq='5s')
@@ -606,14 +608,13 @@ class JaggedKeyValueArrayWithDateTimeIndexTests(unittest.TestCase):
         np.testing.assert_array_equal(expected, result)
 
     def test_resample(self):
-
         k0 = [11, 12, 13]
         k2 = [11, 12, 13]
 
         v0 = [1, 2, 3]
         v2 = [4, 5, 6]
 
-        expected = JaggedKeyValueArray.from_lists([k0,k2], [v0,v2])
+        expected = JaggedKeyValueArray.from_lists([k0, k2], [v0, v2])
         expected.index = pd.date_range('2018-01-01 00:00:00', freq='5s', periods=2)
 
         result = self.arr.resample('5s')
