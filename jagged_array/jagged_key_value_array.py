@@ -252,12 +252,10 @@ class JaggedKeyValueArray(object):
         return data, unique_keys
 
     def cumsum(self):
-        used_keys = self.keys[self.bounds[0]:self.bounds[-1]]
-        unique_keys, inverse_data = np.unique(used_keys, return_inverse=True)
-        if self:
+        unique_keys, inverse_data = np.unique(self.keys, return_inverse=True)
 
-            used_values = self.values[self.bounds[0]:self.bounds[-1]]
-            cs_keys, cs_vals, cs_bounds = _cumsum(used_keys, used_values, self.bounds, unique_keys, inverse_data)
+        if self:
+            cs_keys, cs_vals, cs_bounds = _cumsum(self.keys, self.values, self.bounds, unique_keys, inverse_data)
             return JaggedKeyValueArray(cs_keys, cs_vals, cs_bounds)
         else:
             return JaggedKeyValueArray([], [], [])

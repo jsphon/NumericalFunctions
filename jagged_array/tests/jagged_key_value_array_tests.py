@@ -9,6 +9,7 @@ import jagged_array.jagged_key_value_array as mod
 
 
 class MoreJaggedKeyValueArrayTests(unittest.TestCase):
+
     def test_to_dense_slice_from_beginning(self):
         ''' Check that it works when the bounds start before/after the end'''
         k0 = [10, 11]
@@ -70,9 +71,6 @@ class MoreJaggedKeyValueArrayTests(unittest.TestCase):
         result = arr.get_active_keys()
         expected = np.array([2, 3, 4])
         np.testing.assert_array_equal(expected, result)
-
-
-
 
 
 class JaggedKeyValueArrayTests(unittest.TestCase):
@@ -641,3 +639,4 @@ class JaggedKeyValueArrayWithDateTimeIndexTests(unittest.TestCase):
         np.testing.assert_array_equal(expected.values, result.values)
         np.testing.assert_array_equal(expected.bounds, result.bounds)
         np.testing.assert_array_equal(expected.index, result.index)
+
