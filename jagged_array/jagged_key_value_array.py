@@ -12,6 +12,7 @@ import numba as nb
 import pandas as pd
 import numpy as np
 
+
 from jagged_array.jagged_array import JaggedArray
 from numerical_functions import numba_funcs as nf
 
@@ -438,6 +439,29 @@ class JaggedKeyValueArray(object):
         floored = self.index.floor(freq)
         result.index = floored[indices]
         return result
+
+    @staticmethod
+    def load(filename):
+
+        with np.load(filename) as data:
+            pdata = data['keys']
+            sdata = data['values']
+            bdata = data['bounds']
+
+            return JaggedKeyValueArray(pdata, sdata, bdata)
+
+    def save(self, filename):
+        """
+        Save to a file
+        :return:
+        """
+
+        data = {}
+        data['keys'] = self.keys
+        data['values'] = self.values
+        data['bounds'] = self.bounds
+
+        np.savez_compressed(filename, **data)
 
 
 def modified_median(x):

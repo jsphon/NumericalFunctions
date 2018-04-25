@@ -1,6 +1,7 @@
 import datetime
 import numpy as np
 import pandas as pd
+import tempfile
 import unittest
 
 from jagged_array.jagged_key_value_array import JaggedKeyValueArray
@@ -71,6 +72,9 @@ class MoreJaggedKeyValueArrayTests(unittest.TestCase):
         np.testing.assert_array_equal(expected, result)
 
 
+
+
+
 class JaggedKeyValueArrayTests(unittest.TestCase):
     def setUp(self):
         self.k0 = [11, ]
@@ -87,6 +91,18 @@ class JaggedKeyValueArrayTests(unittest.TestCase):
         self.bounds = [0, 1, 3, 6]
 
         self.arr = JaggedKeyValueArray(self.keys, self.vals, self.bounds)
+
+    def test_io(self):
+
+        file = tempfile.TemporaryFile()
+
+        self.arr.save(file)
+
+        file.seek(0)
+        arr2 = JaggedKeyValueArray.load(file)
+
+        self.assertEqual(self.arr, arr2)
+        file.close()
 
     def test_get_histogram(self):
         result = self.arr.get_histogram()
