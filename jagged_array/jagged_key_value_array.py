@@ -41,10 +41,10 @@ class JaggedKeyValueArray(object):
         else:
             self.bounds = np.array(bounds, dtype=np.int)
 
-        if index:
+        if index is not None:
             self.index = index
         else:
-            self.index = np.arange(len(self))
+            self.index = np.arange(len(self.bounds)-1)
 
     @staticmethod
     def from_lists(key_list, val_list, dtype=None):
@@ -116,7 +116,7 @@ class JaggedKeyValueArray(object):
 
         if (self.index is not None) or (other.index is not None):
 
-            return self.index==other.index
+            return np.array_equal(self.index, other.index)
 
         return True
 
@@ -384,10 +384,13 @@ class JaggedKeyValueArray(object):
         l = len(self)
         length = self.bounds[-1] - self.bounds[0]
         index = np.ndarray(length, dtype=self.index.dtype)
+        lower_bound = self.bounds[0]
         for i in range(l):
             b0 = self.bounds[i]
             b1 = self.bounds[i+1]
-            index[b0:b1] = self.index[i]
+            i0 = b0-lower_bound
+            i1 = b1-lower_bound
+            index[i0:i1] = self.index[i]
 
         values = self.values[self.bounds[0]:self.bounds[-1]]
         keys = self.keys[self.bounds[0]:self.bounds[-1]]
