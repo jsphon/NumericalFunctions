@@ -41,7 +41,10 @@ class JaggedKeyValueArray(object):
         else:
             self.bounds = np.array(bounds, dtype=np.int)
 
-        self.index = index
+        if index:
+            self.index = index
+        else:
+            self.index = np.arange(len(self))
 
     @staticmethod
     def from_lists(key_list, val_list, dtype=None):

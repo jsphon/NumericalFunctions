@@ -90,6 +90,18 @@ class JaggedKeyValueArrayTests(unittest.TestCase):
 
         self.arr = JaggedKeyValueArray(self.keys, self.vals, self.bounds)
 
+    def test_ravel(self):
+        expected_index = np.array([0, 1, 1, 2, 2, 2])
+
+        expected_keys = self.keys
+        expected_vals = self.vals
+
+        i, k, v = self.arr.ravel()
+
+        np.testing.assert_array_equal(expected_index, i)
+        np.testing.assert_array_equal(expected_keys, k)
+        np.testing.assert_array_equal(expected_vals, v)
+
     def test_io(self):
 
         file = tempfile.TemporaryFile()
