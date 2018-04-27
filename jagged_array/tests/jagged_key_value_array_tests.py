@@ -556,6 +556,27 @@ class JaggedKeyValueArrayWithDateTimeIndexTests(unittest.TestCase):
             index=self.index
         )
 
+    def test_ravel(self):
+
+        expected_index = np.array([
+            self.arr.index[0],
+            self.arr.index[1],
+            self.arr.index[1],
+            self.arr.index[2],
+            self.arr.index[2],
+            self.arr.index[2],
+        ], dtype=self.arr.index.dtype)
+
+        expected_keys = self.keys
+        expected_vals = self.vals
+
+        i, k, v = self.arr.ravel()
+
+        np.testing.assert_array_equal(expected_index, i)
+        np.testing.assert_array_equal(expected_keys, k)
+        np.testing.assert_array_equal(expected_vals, v)
+
+
     def test_get_between(self):
         d0 = self.index[0]
         d1 = self.index[1]

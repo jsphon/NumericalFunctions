@@ -369,48 +369,27 @@ class JaggedKeyValueArray(object):
 
         return result
 
-    # def get_hl(self, freq):
-    #     resampled = self.resample(freq)
-    #     result = []
-    #     for row in resampled.get_keys_array():
-    #         result.append([np.max(row), np.min(row)])
-    #     return np.array(result)
-    #
-    # def get_h(self, freq):
-    #     resampled = self.resample(freq)
-    #     result = []
-    #     for row in resampled.get_keys_array():
-    #         result.append(np.max(row))
-    #     return np.array(result)
-    #
-    # def get_c(self, freq):
-    #     indices = get_resample_indices(self.index, freq)
-    #     keys = self.get_keys_array()
-    #
-    #     result = np.ndarray(len(indices)+1, dtype=keys.dtype)
-    #
-    #     for c, i in enumerate(indices):
-    #         row = keys[i]
-    #         median = row[(-1+row.shape[0])//2]
-    #         result[c] = median
-    #
-    #     row = keys[len(keys)-1]
-    #     result[-1] = row[(-1+row.shape[0])//2]
-    #     return result
-    #
-    # def get_o(self, freq):
-    #     indices = get_resample_indices(self.index, freq)
-    #     keys = self.get_keys_array()
-    #
-    #     result = np.ndarray(len(indices)+1, dtype=keys.dtype)
-    #
-    #     row = keys[0]
-    #     result[0] = row[(-1+row.shape[0])//2]
-    #     for c, i in enumerate(indices):
-    #         row = keys[i+1]
-    #         median = row[(-1+row.shape[0])//2]
-    #         result[c+1] = median
-    #     return result
+    def ravel(self):
+        """
+        Return a representation consisting of 3 arrays
+         - index
+         - keys
+         - values
+        :return:
+        """
+
+        l = len(self)
+        length = self.bounds[-1] - self.bounds[0]
+        index = np.ndarray(length, dtype=self.index.dtype)
+        for i in range(l):
+            b0 = self.bounds[i]
+            b1 = self.bounds[i+1]
+            index[b0:b1] = self.index[i]
+
+        values = self.values[self.bounds[0]:self.bounds[-1]]
+        keys = self.keys[self.bounds[0]:self.bounds[-1]]
+
+        return index, keys, values
 
     def resample(self, freq):
         indices = get_resample_indices(self.index, freq)
