@@ -8,6 +8,17 @@ from jagged_array.jagged_key_value_array import JaggedKeyValueArray
 import jagged_array.jagged_key_value_array as mod
 
 
+class ModuleTests(unittest.TestCase):
+
+    def test_floor_to_nearest(self):
+
+        x = np.array([-10, -6, -5, -3, 0, 1, 5, 9, 10, 11])
+        expected = np.array([-10, -10, -5, -5, 0, 0, 5, 5, 10, 10])
+
+        result = mod.floor_to_nearest_int(x, 5)
+        np.testing.assert_array_equal(expected, result)
+
+
 class MoreJaggedKeyValueArrayTests(unittest.TestCase):
 
     def test_to_dense_slice_from_beginning(self):

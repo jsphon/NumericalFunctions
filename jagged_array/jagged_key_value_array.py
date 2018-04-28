@@ -447,6 +447,18 @@ class JaggedKeyValueArray(object):
         np.savez_compressed(filename, **data)
 
 
+@nb.jit(nopython=True)
+def floor_to_nearest_int(x, multiplier):
+    """
+    Floor each value of x to the nearest multiple of multiplier
+    :param x: array
+    :param multiplier:
+    :return:
+    """
+
+    return multiplier * (x//multiplier)
+
+
 def modified_median(x):
     """
     Return the median if x has an odd number of values
