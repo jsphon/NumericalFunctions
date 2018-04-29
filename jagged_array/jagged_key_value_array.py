@@ -419,6 +419,9 @@ class JaggedKeyValueArray(object):
         return index, keys, values
 
     def resample(self, freq):
+        floored = self.index // freq
+        #indices = freq * floored
+        #index = floored[indices]
         indices = get_resample_indices(self.index, freq)
         cs = self.cumsum()
 
@@ -439,8 +442,10 @@ class JaggedKeyValueArray(object):
 
         diff_data = np.r_[row_diffs]
         result = JaggedKeyValueArray.from_dense(diff_data, unique_keys, dtype=np.int)
+        # result.index = index
 
-        floored = self.index.floor(freq)
+        #floored = self.index.floor(freq)
+        #floored = self.index//freq
         result.index = floored[indices]
         return result
 

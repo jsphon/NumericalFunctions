@@ -730,9 +730,9 @@ class JaggedKeyValueArrayWithDateTimeIndexTests(unittest.TestCase):
         v2 = [4, 5, 6]
 
         expected = JaggedKeyValueArray.from_lists([k0, k2], [v0, v2])
-        expected.index = pd.date_range('2018-01-01 00:00:00', freq='5s', periods=2)
+        #expected.index = pd.date_range('2018-01-01 00:00:00', freq='5s', periods=2)
 
-        result = self.arr.resample('5s')
+        result = self.arr.resample(5)
 
         print('Resample result is %s' % result)
 
