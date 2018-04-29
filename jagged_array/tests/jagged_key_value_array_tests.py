@@ -730,14 +730,18 @@ class JaggedKeyValueArrayWithDateTimeIndexTests(unittest.TestCase):
         v2 = [4, 5, 6]
 
         expected = JaggedKeyValueArray.from_lists([k0, k2], [v0, v2])
-        #expected.index = pd.date_range('2018-01-01 00:00:00', freq='5s', periods=2)
 
         result = self.arr.resample(5)
-
-        print('Resample result is %s' % result)
 
         np.testing.assert_array_equal(expected.keys, result.keys)
         np.testing.assert_array_equal(expected.values, result.values)
         np.testing.assert_array_equal(expected.bounds, result.bounds)
         np.testing.assert_array_equal(expected.index, result.index)
 
+    def test_resample_with_gap(self):
+        """
+        Write a test to show that resample works
+        if there is a gap in the resampled index
+        :return:
+        """
+        self.fail()

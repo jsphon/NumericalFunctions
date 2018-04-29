@@ -419,10 +419,15 @@ class JaggedKeyValueArray(object):
         return index, keys, values
 
     def resample(self, freq):
+        """
+        Resample this, bucketting into data points floored to integer multiples
+        of freq
+        :param freq:
+        :return:
+        """
         floored = self.index // freq
-        #indices = freq * floored
-        #index = floored[indices]
-        indices = get_resample_indices(self.index, freq)
+        indices = get_change_indices(floored)
+
         cs = self.cumsum()
 
         data, unique_keys = cs.to_dense()
@@ -442,10 +447,6 @@ class JaggedKeyValueArray(object):
 
         diff_data = np.r_[row_diffs]
         result = JaggedKeyValueArray.from_dense(diff_data, unique_keys, dtype=np.int)
-        # result.index = index
-
-        #floored = self.index.floor(freq)
-        #floored = self.index//freq
         result.index = floored[indices]
         return result
 
@@ -471,18 +472,6 @@ class JaggedKeyValueArray(object):
         data['bounds'] = self.bounds
 
         np.savez_compressed(filename, **data)
-
-
-@nb.jit(nopython=True)
-def floor_to_nearest_int(x, multiplier):
-    """
-    Floor each value of x to the nearest multiple of multiplier
-    :param x: array
-    :param multiplier:
-    :return:
-    """
-
-    return multiplier * (x//multiplier)
 
 
 def modified_median(x):
@@ -525,7 +514,26 @@ def get_resample_indices(index, multiplier):
     # TODO: Might be inefficient, as get_resampled_indices could be called
     # in the parent
     floored = floor_to_nearest_int(index, multiplier)
-    i1 = np.where(np.diff(floored))[0] + 1
+    return get_change_indices(floored)
+    # i1 = np.where(np.diff(floored))[0] + 1
+    # i0 = np.array([0])
+    # return np.r_[i0, i1]
+
+
+@nb.jit(nopython=True)
+def floor_to_nearest_int(x, multiplier):
+    """
+    Floor each value of x to the nearest multiple of multiplier
+    :param x: array
+    :param multiplier:
+    :return:
+    """
+
+    return multiplier * (x//multiplier)
+
+
+def get_change_indices(x):
+    i1 = np.where(np.diff(x))[0] + 1
     i0 = np.array([0])
     return np.r_[i0, i1]
 
