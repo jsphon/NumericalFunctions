@@ -158,7 +158,7 @@ class JaggedKeyValueArray(object):
         if last is not None:
             i1 = self.index.searchsorted(last)
         else:
-            i1 = self.index[-1]
+            i1 = len(self.bounds)-1
 
         keys = self.keys[self.bounds[i0]:self.bounds[i1]]
         values = self.values[self.bounds[i0]:self.bounds[i1]]
@@ -171,25 +171,6 @@ class JaggedKeyValueArray(object):
         )
 
     def __getitem__(self, i):
-
-        # if isinstance(self.index, pd.DatetimeIndex):
-        #     if is_date_type(i):
-        #         i0 = self.index.get_loc(i)
-        #         return self[i0]
-        #
-        #     if isinstance(i, slice)\
-        #             and (is_date_type(i.start) or is_date_type(i.stop)):
-        #
-        #         i0 = self.index.get_loc(i.start) if i.start else None
-        #         i1 = self.index.get_loc(i.stop) + 1 if i.stop else None
-        #
-        #         s = slice(i0, i1, i.step)
-        #         return JaggedKeyValueArray(
-        #             self.keys,
-        #             self.values,
-        #             self.bounds[s],
-        #             index=self.index[i0:i1]
-        #         )
 
         if isinstance(i, INT_TYPES):
             i0 = self.bounds[i]

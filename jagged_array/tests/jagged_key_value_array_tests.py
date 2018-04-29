@@ -681,6 +681,28 @@ class JaggedKeyValueArrayWithDateTimeIndexTests(unittest.TestCase):
             expected_index = np.array(ind)
             np.testing.assert_array_equal(expected_index, r.index)
 
+    def test_loc_slice_no_last(self):
+
+        for first, b, k, v, ind in (
+                [3, [0, 1, 3, 6], [11, 12, 13, 11, 12, 13], [1, 2, 3, 4, 5, 6], [3, 4, 5]],
+                [4, [0, 2, 5], [12, 13, 11, 12, 13], [2, 3, 4, 5, 6], [4, 5]],
+                [5, [0, 3], [11, 12, 13], [4, 5, 6], [5]],
+        ):
+            r = self.arr.loc_slice(first=first)
+            self.assertIsInstance(r, JaggedKeyValueArray)
+
+            expected_bounds = np.array(b)
+            np.testing.assert_array_equal(expected_bounds, r.bounds)
+
+            expected_keys = np.array(k)
+            np.testing.assert_array_equal(expected_keys, r.keys)
+
+            expected_values = np.array(v)
+            np.testing.assert_array_equal(expected_values, r.values)
+
+            expected_index = np.array(ind)
+            np.testing.assert_array_equal(expected_index, r.index)
+
     def test_get_resampled_index(self):
         date_range = pd.date_range('20180101', freq='1s', periods=11)
         print('date_range is %s' % date_range)
