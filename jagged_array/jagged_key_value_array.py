@@ -143,20 +143,20 @@ class JaggedKeyValueArray(object):
         i1 = self.bounds[index1]
         return (self.keys[i0:i1], self.values[i0:i1])
 
-    def loc_slice(self, iStart, iEnd):
+    def loc_slice(self, first=None, last=None):
         """
         Like loc, with slicing
-        :param iStart:
-        :param iEnd:
+        :param first:
+        :param last:
         :return: JaggedKeyValueArray
         """
-        if iStart is not None:
-            i0 = self.index.searchsorted(iStart)
+        if first is not None:
+            i0 = self.index.searchsorted(first)
         else:
-            i0 = self.index[0]
+            i0 = 0
 
-        if iEnd is not None:
-            i1 = self.index.searchsorted(iEnd)
+        if last is not None:
+            i1 = self.index.searchsorted(last)
         else:
             i1 = self.index[-1]
 
