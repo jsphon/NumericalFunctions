@@ -1,4 +1,3 @@
-import datetime
 import numpy as np
 import pandas as pd
 import tempfile
@@ -16,6 +15,13 @@ class ModuleTests(unittest.TestCase):
         expected = np.array([-10, -10, -5, -5, 0, 0, 5, 5, 10, 10])
 
         result = mod.floor_to_nearest_int(x, 5)
+        np.testing.assert_array_equal(expected, result)
+
+    def test_get_resample_indices(self):
+        x = np.array([-10, -6, -5, -3, 0, 1, 5, 9, 10, 11])
+        expected = np.array([0, 2, 4, 6, 8])
+        result = mod.get_resample_indices(x, multiplier=5)
+
         np.testing.assert_array_equal(expected, result)
 
 
@@ -570,7 +576,7 @@ class JaggedKeyValueArrayWithDateTimeIndexTests(unittest.TestCase):
 
         self.bounds = [0, 1, 3, 6]
 
-        self.index = pd.date_range('2018-01-01 00:00:03', freq='1s', periods=3)
+        self.index = np.array([3, 4, 5])
 
         self.arr = JaggedKeyValueArray(
             self.keys,
@@ -599,44 +605,59 @@ class JaggedKeyValueArrayWithDateTimeIndexTests(unittest.TestCase):
         np.testing.assert_array_equal(expected_keys, k)
         np.testing.assert_array_equal(expected_vals, v)
 
+    # TODO: We will need slicing on both the index, and the
+    # actual row location. i.e. If we have floating point index
+    # values, but want to get it between integer points, will out
+    # slicing handle that?
+    # def test_get_between(self):
+    #     d0 = self.index[0]
+    #     d1 = self.index[1]
+    #     d2 = self.index[2]
+    #
+    #     result = self.arr.get_between(d0, d2)
+    #
+    #     expected_index = pd.DatetimeIndex([d1])
+    #     self.assertEqual(expected_index, result.index)
+    #     np.testing.assert_array_equal(self.k1, result[0][0])
+    #     np.testing.assert_array_equal(self.v1, result[0][1])
 
-    def test_get_between(self):
-        d0 = self.index[0]
-        d1 = self.index[1]
-        d2 = self.index[2]
+    #def test___getitem__row0(self):
+    def test_loc(self):
 
-        result = self.arr.get_between(d0, d2)
+        for index, expected in (
+            [3, ([11], [1])],
+            [4, ([12, 13], [2, 3])],
+            [5, ([11, 12, 13], [4, 5, 6])],
+        ):
 
-        expected_index = pd.DatetimeIndex([d1])
-        self.assertEqual(expected_index, result.index)
-        np.testing.assert_array_equal(self.k1, result[0][0])
-        np.testing.assert_array_equal(self.v1, result[0][1])
+            r = self.arr.loc(index)
 
-    def test___getitem__row0(self):
-        r = self.arr[self.index[0]]
+            expected_keys = np.array(expected[0])
+            expected_values = np.array(expected[1])
+            np.testing.assert_array_equal(expected_keys, r[0])
+            np.testing.assert_array_equal(expected_values, r[1])
 
-        e0 = np.array(self.k0)
-        e1 = np.array(self.v0)
+    def test_loc_slice(self):
 
-        np.testing.assert_array_equal(e0, r[0])
-        np.testing.assert_array_equal(e1, r[1])
+        for iStart, iEnd, b, k, v, ind in (
+            [3, 4, [0, 1], [11], [1], [3]],
+            [4, 5, [0, 2], [12, 13], [2, 3], [4]],
+            [3, 5, [0, 1, 3], [11, 12, 13], [1, 2, 3], [3, 4]],
+        ):
+            r = self.arr.loc_slice(iStart, iEnd)
+            self.assertIsInstance(r, JaggedKeyValueArray)
 
-    def test___getitem__row1(self):
-        r = self.arr[self.index[1]]
+            expected_bounds = np.array(b)
+            np.testing.assert_array_equal(expected_bounds, r.bounds)
 
-        e0 = np.array(self.k1)
-        e1 = np.array(self.v1)
+            expected_keys = np.array(k)
+            np.testing.assert_array_equal(expected_keys, r.keys)
 
-        np.testing.assert_array_equal(e0, r[0])
-        np.testing.assert_array_equal(e1, r[1])
+            expected_values = np.array(v)
+            np.testing.assert_array_equal(expected_values, r.values)
 
-    def test__getitem_1dslice1(self):
-        r = self.arr[:self.index[1]]
-        print('test__getitem_1dslice: %s' % r)
-        self.assertIsInstance(r, JaggedKeyValueArray)
-        self.assertEqual(1, len(r))
-        self.assertEqual(0, r.bounds[0])
-        self.assertEqual(1, r.bounds[1])
+            expected_index = np.array(ind)
+            np.testing.assert_array_equal(expected_index, r.index)
 
     def test_get_resampled_index(self):
         date_range = pd.date_range('20180101', freq='1s', periods=11)
@@ -656,14 +677,6 @@ class JaggedKeyValueArrayWithDateTimeIndexTests(unittest.TestCase):
         date_range = pd.date_range('20180101', freq='5s', periods=11)
         result = mod.get_resampled_index(date_range, freq='5s')
         np.testing.assert_array_equal(date_range, result)
-
-    def test_get_resample_indices(self):
-        date_range = pd.date_range('20180101', freq='1s', periods=11)
-        print('date_range is %s' % date_range)
-        result = mod.get_resample_indices(date_range, freq='5s')
-
-        expected = np.array([0, 5, 10])
-        np.testing.assert_array_equal(expected, result)
 
     def test_resample(self):
         k0 = [11, 12, 13]

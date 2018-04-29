@@ -120,36 +120,76 @@ class JaggedKeyValueArray(object):
 
         return True
 
-    def get_between(self, d0, d1):
-        ''' Get a JaggedKeyValue array that is between d0 and d1.
-        The result does not include d0 or d1
-        It assumes the index is sorted.
-        '''
-        i0 = self.index.searchsorted(d0)+1
-        i1 = self.index.searchsorted(d1)
-        result = self[i0:i1]
-        return result
+    # def get_between(self, d0, d1):
+    #     ''' Get a JaggedKeyValue array that is between d0 and d1.
+    #     The result does not include d0 or d1
+    #     It assumes the index is sorted.
+    #     '''
+    #     i0 = self.index.searchsorted(d0)+1
+    #     i1 = self.index.searchsorted(d1)
+    #     result = self[i0:i1]
+    #     return result
+
+    def loc(self, i):
+        """
+        like __getitem__, but using the index
+        :return:
+        """
+
+        index0 = self.index.searchsorted(i)
+        index1 = index0+1
+
+        i0 = self.bounds[index0]
+        i1 = self.bounds[index1]
+        return (self.keys[i0:i1], self.values[i0:i1])
+
+    def loc_slice(self, iStart, iEnd):
+        """
+        Like loc, with slicing
+        :param iStart:
+        :param iEnd:
+        :return: JaggedKeyValueArray
+        """
+        if iStart is not None:
+            i0 = self.index.searchsorted(iStart)
+        else:
+            i0 = self.index[0]
+
+        if iEnd is not None:
+            i1 = self.index.searchsorted(iEnd)
+        else:
+            i1 = self.index[-1]
+
+        keys = self.keys[self.bounds[i0]:self.bounds[i1]]
+        values = self.values[self.bounds[i0]:self.bounds[i1]]
+
+        return JaggedKeyValueArray(
+            keys,
+            values,
+            self.bounds[i0:i1+1] - self.bounds[i0],
+            index=self.index[i0:i1]
+        )
 
     def __getitem__(self, i):
 
-        if isinstance(self.index, pd.DatetimeIndex):
-            if is_date_type(i):
-                i0 = self.index.get_loc(i)
-                return self[i0]
-
-            if isinstance(i, slice)\
-                    and (is_date_type(i.start) or is_date_type(i.stop)):
-
-                i0 = self.index.get_loc(i.start) if i.start else None
-                i1 = self.index.get_loc(i.stop) + 1 if i.stop else None
-
-                s = slice(i0, i1, i.step)
-                return JaggedKeyValueArray(
-                    self.keys,
-                    self.values,
-                    self.bounds[s],
-                    index=self.index[i0:i1]
-                )
+        # if isinstance(self.index, pd.DatetimeIndex):
+        #     if is_date_type(i):
+        #         i0 = self.index.get_loc(i)
+        #         return self[i0]
+        #
+        #     if isinstance(i, slice)\
+        #             and (is_date_type(i.start) or is_date_type(i.stop)):
+        #
+        #         i0 = self.index.get_loc(i.start) if i.start else None
+        #         i1 = self.index.get_loc(i.stop) + 1 if i.stop else None
+        #
+        #         s = slice(i0, i1, i.step)
+        #         return JaggedKeyValueArray(
+        #             self.keys,
+        #             self.values,
+        #             self.bounds[s],
+        #             index=self.index[i0:i1]
+        #         )
 
         if isinstance(i, INT_TYPES):
             i0 = self.bounds[i]
@@ -488,16 +528,17 @@ def get_resampled_index(date_range, freq):
     return floored[indices]
 
 
-def get_resample_indices(date_range, freq):
+def get_resample_indices(index, multiplier):
     """
     Return the integer indices representing the 1st index of each resampled
     bin. i.e. the index that would represent the open of an ohlc bar.
-    :param date_range:
+    :param index:
     :param freq:
     :return:
     """
-    # TODO: Inefficient, date_range.floor also called in parent
-    floored = date_range.floor(freq)
+    # TODO: Might be inefficient, as get_resampled_indices could be called
+    # in the parent
+    floored = floor_to_nearest_int(index, multiplier)
     i1 = np.where(np.diff(floored))[0] + 1
     i0 = np.array([0])
     return np.r_[i0, i1]
