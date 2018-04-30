@@ -291,8 +291,8 @@ class JaggedKeyValueArray(object):
 
     def get_ohlcv_frame_by_interval(self, freq):
         resampled_index = get_resample_indices(self.index, freq)
-        ohlc = self.get_ohlc(freq)
-        v = self.get_v(freq)
+        ohlc = self.get_ohlc_by_interval(freq)
+        v = self.get_v_by_index(freq)
         df = pd.DataFrame(
             ohlc,
             index=resampled_index,
@@ -415,29 +415,13 @@ class JaggedKeyValueArray(object):
         return result
 
     def get_v_by_date_index(self, freq):
-
         indices = get_resampled_datetime_index(self.date_index, freq)
         return self._get_resampled_v(indices)
-        #indices = get_resample_indices(self.index, freq)
 
     def get_v_by_index(self, freq):
 
         indices = get_resample_indices(self.index, freq)
         return self._get_resampled_v(indices)
-
-        # result = np.ndarray(len(indices), dtype=self.values.dtype)
-        #
-        # extended_indices = np.append(indices, len(self.bounds))
-        # extended_bounds = np.append(self.bounds, len(self.values))
-        # for i in range(0, len(indices)):
-        #     open_index0 = extended_bounds[extended_indices[i]]
-        #     closing_index1 = extended_bounds[extended_indices[i + 1]]
-        #
-        #     # High and Low
-        #     all_values = self.values[open_index0:closing_index1]
-        #     result[i] = all_values.sum()
-        #
-        # return result
 
     def _get_resampled_v(self, indices):
 
@@ -557,7 +541,8 @@ def get_resampled_datetime_index(date_range, freq):
     :return:
     """
     floored = date_range.floor(freq)
-    return get_change_indices(floored)
+    changed_indices = get_change_indices(floored)
+    return date_range[changed_indices]
 
 
 def get_resample_indices(index, multiplier):
