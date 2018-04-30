@@ -22,7 +22,7 @@ DEFAULT_DTYPE = np.float32
 
 class JaggedKeyValueArray(object):
 
-    def __init__(self, keys, values, bounds, dtype=None, index=None):
+    def __init__(self, keys, values, bounds, dtype=None, index=None, date_index=None):
 
         dtype = dtype or DEFAULT_DTYPE
 
@@ -42,9 +42,14 @@ class JaggedKeyValueArray(object):
             self.bounds = np.array(bounds, dtype=np.int)
 
         if index is not None:
-            self.index = index
+            if isinstance(index, (list, tuple)):
+                self.index = np.array(index)
+            else:
+                self.index = index
         else:
             self.index = np.arange(len(self.bounds)-1)
+
+        self.date_index = date_index
 
     @staticmethod
     def from_lists(key_list, val_list, dtype=None):
@@ -284,8 +289,8 @@ class JaggedKeyValueArray(object):
         else:
             return JaggedKeyValueArray([], [], [])
 
-    def get_ohlcv_frame(self, freq):
-        resampled_index = get_resampled_index(self.index, freq)
+    def get_ohlcv_frame_by_interval(self, freq):
+        resampled_index = get_resample_indices(self.index, freq)
         ohlc = self.get_ohlc(freq)
         v = self.get_v(freq)
         df = pd.DataFrame(
@@ -296,7 +301,19 @@ class JaggedKeyValueArray(object):
         df['v'] = v
         return df
 
-    def get_ohlc(self, freq):
+    def get_ohlcv_frame_by_date_index(self, freq):
+        resampled_index = get_resampled_datetime_index(self.date_index, freq)
+        ohlc = self.get_ohlc_by_date_index(freq)
+        v = self.get_v_by_date_index(freq)
+        df = pd.DataFrame(
+            ohlc,
+            index=resampled_index,
+            columns=['o', 'h', 'l', 'c']
+        )
+        df['v'] = v
+        return df
+
+    def get_ohlc_by_interval(self, freq):
         """
         Convert this array into Open/High/Low/Close bars
         :param freq:
@@ -304,6 +321,19 @@ class JaggedKeyValueArray(object):
         """
 
         resampled_bounds = self.get_resample_index_bounds(freq)
+        return self._get_ohlc(resampled_bounds)
+
+    def get_ohlc_by_date_index(self, freq):
+        """
+        Convert this array into Open/High/Low/Close bars
+        :param freq:
+        :return:
+        """
+
+        resampled_bounds = self.get_resample_date_index_bounds(freq)
+        return self._get_ohlc(resampled_bounds)
+
+    def _get_ohlc(self, resampled_bounds):
 
         # Needs to be a float so that we can have nans
         result = np.empty((len(resampled_bounds), 4), dtype=np.float)
@@ -345,7 +375,12 @@ class JaggedKeyValueArray(object):
         all_keys = self.keys[self.bounds[0]:self.bounds[-1]]
         return np.unique(all_keys)
 
-    def get_resample_index_bounds(self, freq):
+    def get_resample_index_bounds(self, interval):
+
+        floored = self.index // interval
+        return self._get_resample_bounds(floored)
+
+    def get_resample_date_index_bounds(self, freq):
         """
         Return a matrix of indices used for resampling
 
@@ -356,8 +391,12 @@ class JaggedKeyValueArray(object):
         :return:
         """
 
-        floored = self.index.floor(freq)
-        i1 = np.where(np.diff(floored))[0] + 1
+        floored = self.date_index.floor(freq)
+        return self._get_resample_bounds(floored)
+
+    def _get_resample_bounds(self, floored_index):
+
+        i1 = np.where(np.diff(floored_index))[0] + 1
         i0 = np.array([0])
         open_bound_start_indices = np.r_[i0, i1]
         open_bound_end_indices = open_bound_start_indices+1
@@ -375,9 +414,32 @@ class JaggedKeyValueArray(object):
 
         return result
 
-    def get_v(self, freq):
+    def get_v_by_date_index(self, freq):
+
+        indices = get_resampled_datetime_index(self.date_index, freq)
+        return self._get_resampled_v(indices)
+        #indices = get_resample_indices(self.index, freq)
+
+    def get_v_by_index(self, freq):
 
         indices = get_resample_indices(self.index, freq)
+        return self._get_resampled_v(indices)
+
+        # result = np.ndarray(len(indices), dtype=self.values.dtype)
+        #
+        # extended_indices = np.append(indices, len(self.bounds))
+        # extended_bounds = np.append(self.bounds, len(self.values))
+        # for i in range(0, len(indices)):
+        #     open_index0 = extended_bounds[extended_indices[i]]
+        #     closing_index1 = extended_bounds[extended_indices[i + 1]]
+        #
+        #     # High and Low
+        #     all_values = self.values[open_index0:closing_index1]
+        #     result[i] = all_values.sum()
+        #
+        # return result
+
+    def _get_resampled_v(self, indices):
 
         result = np.ndarray(len(indices), dtype=self.values.dtype)
 
@@ -487,7 +549,7 @@ def modified_median(x):
         return np.nan
 
 
-def get_resampled_index(date_range, freq):
+def get_resampled_datetime_index(date_range, freq):
     """
     Return a date_range, resampled
     :param date_range:
@@ -495,12 +557,7 @@ def get_resampled_index(date_range, freq):
     :return:
     """
     floored = date_range.floor(freq)
-    i1 = np.where(np.diff(floored))[0]+1
-    i0 = np.array([0])
-
-    indices = np.r_[i0, i1]
-
-    return floored[indices]
+    return get_change_indices(floored)
 
 
 def get_resample_indices(index, multiplier):
@@ -515,9 +572,6 @@ def get_resample_indices(index, multiplier):
     # in the parent
     floored = floor_to_nearest_int(index, multiplier)
     return get_change_indices(floored)
-    # i1 = np.where(np.diff(floored))[0] + 1
-    # i0 = np.array([0])
-    # return np.r_[i0, i1]
 
 
 @nb.jit(nopython=True)

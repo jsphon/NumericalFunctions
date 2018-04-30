@@ -512,16 +512,29 @@ class OHLCTests(unittest.TestCase):
 
         self.bounds = [0, 1, 3, 6, 9, 12, 15]
 
-        self.index = pd.date_range('2018-01-01 00:00:04', freq='2s', periods=6)
+        self.date_index = pd.date_range('2018-01-01 00:00:04', freq='2s', periods=6)
+        self.index = [4, 6, 8, 10, 12, 14]
         self.arr = JaggedKeyValueArray(
             self.keys,
             self.vals,
             self.bounds,
-            index=self.index
+            index=self.index,
+            date_index = self.date_index
         )
 
-    def test_get_ohlc(self):
-        result = self.arr.get_ohlc('5s')
+    def test_get_ohlc_by_interval(self):
+        result = self.arr.get_ohlc_by_interval(5)
+        expected = np.array([
+            [11, 11, 11, 11],
+            [12, 16, 12, 15],
+            [18, 25, 17, 24],
+        ])
+
+        print(result)
+        np.testing.assert_array_equal(expected, result)
+
+    def test_get_ohlc_by_date_index(self):
+        result = self.arr.get_ohlc_by_date_index('5s')
         expected = np.array([
             [11, 11, 11, 11],
             [12, 16, 12, 15],
@@ -532,7 +545,7 @@ class OHLCTests(unittest.TestCase):
         np.testing.assert_array_equal(expected, result)
 
     def test_get_resample_index_bounds(self):
-        result = self.arr.get_resample_index_bounds('5s')
+        result = self.arr.get_resample_index_bounds(5)
 
         expected = np.array([
             [0, 1, 0, 1],
@@ -541,8 +554,18 @@ class OHLCTests(unittest.TestCase):
         ])
         np.testing.assert_array_equal(expected, result)
 
-    def test_get_ohlcv_frame(self):
-        result = self.arr.get_ohlcv_frame('5s')
+    def test_get_resample_date_index_bounds(self):
+        result = self.arr.get_resample_date_index_bounds('5s')
+
+        expected = np.array([
+            [0, 1, 0, 1],
+            [1, 3, 3, 6],
+            [6, 9, 12, 15],
+        ])
+        np.testing.assert_array_equal(expected, result)
+
+    def test_get_ohlcv_frame_by_date_index(self):
+        result = self.arr.get_ohlcv_frame_by_date_index('5s')
         print(result)
 
         expected_index = pd.date_range('2018-01-01 00:00:00', freq='5s', periods=3)
@@ -562,6 +585,7 @@ class OHLCTests(unittest.TestCase):
 
 
 class JaggedKeyValueArrayWithDateTimeIndexTests(unittest.TestCase):
+
     def setUp(self):
         self.k0 = [11, ]
         self.k1 = [12, 13]
@@ -707,7 +731,7 @@ class JaggedKeyValueArrayWithDateTimeIndexTests(unittest.TestCase):
         date_range = pd.date_range('20180101', freq='1s', periods=11)
         print('date_range is %s' % date_range)
 
-        result = mod.get_resampled_index(date_range, freq='5s')
+        result = mod.get_resampled_datetime_index(date_range, freq='5s')
 
         expected = pd.date_range('20180101', freq='5s', periods=3)
 
@@ -719,7 +743,7 @@ class JaggedKeyValueArrayWithDateTimeIndexTests(unittest.TestCase):
         """
 
         date_range = pd.date_range('20180101', freq='5s', periods=11)
-        result = mod.get_resampled_index(date_range, freq='5s')
+        result = mod.get_resampled_datetime_index(date_range, freq='5s')
         np.testing.assert_array_equal(date_range, result)
 
     def test_resample(self):
@@ -738,10 +762,53 @@ class JaggedKeyValueArrayWithDateTimeIndexTests(unittest.TestCase):
         np.testing.assert_array_equal(expected.bounds, result.bounds)
         np.testing.assert_array_equal(expected.index, result.index)
 
-    def test_resample_with_gap(self):
-        """
-        Write a test to show that resample works
-        if there is a gap in the resampled index
-        :return:
-        """
-        self.fail()
+#
+# class JaggedKeyValueArrayWithDateTimeIndexTests(unittest.TestCase):
+#
+#     def setUp(self):
+#         self.k0 = [11, ]
+#         self.k1 = []
+#         self.k2 = [11, 12, 13]
+#
+#         self.v0 = [1, ]
+#         self.v1 = []
+#         self.v2 = [4, 5, 6]
+#
+#         self.keys = self.k0 + self.k1 + self.k2
+#         self.vals = self.v0 + self.v1 + self.v2
+#
+#         self.bounds = [0, 1, 1, 4]
+#
+#         self.index = np.array([3, 4, 5])
+#
+#         self.arr = JaggedKeyValueArray(
+#             self.keys,
+#             self.vals,
+#             self.bounds,
+#             index=self.index
+#         )
+#
+#       Might be unneeded. We'll just get zeros
+#     def test_resample_with_gap(self):
+#         """
+#         Write a test to show that resample works
+#         if there is a gap in the resampled index
+#         :return:
+#         """
+#
+#         k0 = [11]
+#         k1 = []
+#         k2 = [11, 12, 13]
+#
+#         v0 = [1]
+#         v1 = []
+#         v2 = [4, 5, 6]
+#
+#         expected = JaggedKeyValueArray.from_lists([k0, k1, k2], [v0, v1, v2])
+#
+#         result = self.arr.resample(5)
+#
+#         np.testing.assert_array_equal(expected.keys, result.keys)
+#         np.testing.assert_array_equal(expected.values, result.values)
+#         np.testing.assert_array_equal(expected.bounds, result.bounds)
+#         np.testing.assert_array_equal(expected.index, result.index)
