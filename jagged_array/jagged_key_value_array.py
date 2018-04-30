@@ -125,16 +125,6 @@ class JaggedKeyValueArray(object):
 
         return True
 
-    # def get_between(self, d0, d1):
-    #     ''' Get a JaggedKeyValue array that is between d0 and d1.
-    #     The result does not include d0 or d1
-    #     It assumes the index is sorted.
-    #     '''
-    #     i0 = self.index.searchsorted(d0)+1
-    #     i1 = self.index.searchsorted(d1)
-    #     result = self[i0:i1]
-    #     return result
-
     def loc(self, i):
         """
         like __getitem__, but using the index

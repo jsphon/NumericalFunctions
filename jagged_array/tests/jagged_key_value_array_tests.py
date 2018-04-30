@@ -414,8 +414,7 @@ class OHLCTests2WithDateIndex(unittest.TestCase):
             result[:, 3]
         )
 
-
-class OHLCTests3(unittest.TestCase):
+class OHLCTests3WithNumericalIndex(unittest.TestCase):
     def setUp(self):
         self.k0 = [11]
         self.k1 = []
@@ -431,6 +430,7 @@ class OHLCTests3(unittest.TestCase):
         self.bounds = [0, 1, 1, 4]
 
         self.index = pd.date_range('2018-01-01 00:00:00', freq='5s', periods=3)
+        self.index = [0, 5, 10]
         self.arr = JaggedKeyValueArray(
             self.keys,
             self.vals,
@@ -439,20 +439,20 @@ class OHLCTests3(unittest.TestCase):
         )
 
     def test_get_resample_index_bounds(self):
-        result = self.arr.get_resample_index_bounds('5s')
+        result = self.arr.get_resample_index_bounds(5)
         expected = np.array([
             [0, 1, 0, 1],
             [1, 1, 1, 1],
-            [1, 5, 1, 5],
+            [1, 4, 1, 4],
         ])
 
         np.testing.assert_array_equal(expected, result)
 
     def test_get_ohlcv_frame(self):
-        result = self.arr.get_ohlcv_frame('5s')
+        result = self.arr.get_ohlcv_frame_by_interval(5)
         print(result)
 
-        expected_index = pd.date_range('2018-01-01 00:00:00', freq='5s', periods=3)
+        expected_index = [0, 1, 2]#pd.date_range('2018-01-01 00:00:00', freq='5s', periods=3)
         expected_values = [[11.0, 11.0, 11.0, 11.0, 1.0],
                            [np.nan, np.nan, np.nan, np.nan, 0.0],
                            [14.0, 15.0, 13.0, 14.0, 15.0]]
@@ -462,47 +462,94 @@ class OHLCTests3(unittest.TestCase):
         np.testing.assert_array_equal(expected_index, result.index)
 
 
-class OHLCTests3(unittest.TestCase):
-    def setUp(self):
-        self.keys = [580, 590]  # , 600]
-        self.vals = [1, 2]  # , 2]
+# class OHLCTests3(unittest.TestCase):
+#     def setUp(self):
+#         self.k0 = [11]
+#         self.k1 = []
+#         self.k2 = [13, 14, 15]
+#
+#         self.v0 = [1, ]
+#         self.v1 = []
+#         self.v2 = [4, 5, 6]
+#
+#         self.keys = self.k0 + self.k1 + self.k2
+#         self.vals = self.v0 + self.v1 + self.v2
+#
+#         self.bounds = [0, 1, 1, 4]
+#
+#         self.index = pd.date_range('2018-01-01 00:00:00', freq='5s', periods=3)
+#         self.arr = JaggedKeyValueArray(
+#             self.keys,
+#             self.vals,
+#             self.bounds,
+#             index=self.index
+#         )
+#
+#     def test_get_resample_index_bounds(self):
+#         result = self.arr.get_resample_index_bounds('5s')
+#         expected = np.array([
+#             [0, 1, 0, 1],
+#             [1, 1, 1, 1],
+#             [1, 5, 1, 5],
+#         ])
+#
+#         np.testing.assert_array_equal(expected, result)
+#
+#     def test_get_ohlcv_frame(self):
+#         result = self.arr.get_ohlcv_frame('5s')
+#         print(result)
+#
+#         expected_index = pd.date_range('2018-01-01 00:00:00', freq='5s', periods=3)
+#         expected_values = [[11.0, 11.0, 11.0, 11.0, 1.0],
+#                            [np.nan, np.nan, np.nan, np.nan, 0.0],
+#                            [14.0, 15.0, 13.0, 14.0, 15.0]]
+#
+#         np.testing.assert_array_equal(expected_values, result.values)
+#         np.testing.assert_array_equal(['o', 'h', 'l', 'c', 'v'], result.columns)
+#         np.testing.assert_array_equal(expected_index, result.index)
 
-        self.bounds = [0, 2, 2]
 
-        self.index = pd.date_range('2018-01-01 00:00:00', freq='5s', periods=2)
-        self.arr = JaggedKeyValueArray(
-            self.keys,
-            self.vals,
-            self.bounds,
-            index=self.index
-        )
-
-    def test_get_resample_index_bounds(self):
-        result = self.arr.get_resample_index_bounds('5s')
-
-        expected = np.array([
-            [0, 2, 0, 2],
-            [2, 2, 2, 2],  # empty
-        ])
-        np.testing.assert_array_equal(expected, result)
-
-    def test_get_ohlcv_frame(self):
-        result = self.arr.get_ohlcv_frame('5s')
-        print(result)
-
-        expected_index = pd.date_range('2018-01-01 00:00:00', freq='5s', periods=2)
-        expected_values = [[580.0, 590.0, 580.0, 580.0, 3.0],
-                           [np.nan, np.nan, np.nan, np.nan, 0.0]]
-
-        np.testing.assert_array_equal(expected_values, result.values)
-        np.testing.assert_array_equal(['o', 'h', 'l', 'c', 'v'], result.columns)
-        np.testing.assert_array_equal(expected_index, result.index)
-
-    def test_get_v(self):
-        v = self.arr.get_v('5s')
-
-        expected = np.array([3, 0])
-        np.testing.assert_array_equal(expected, v)
+# class OHLCTests3(unittest.TestCase):
+#     def setUp(self):
+#         self.keys = [580, 590]  # , 600]
+#         self.vals = [1, 2]  # , 2]
+#
+#         self.bounds = [0, 2, 2]
+#
+#         self.index = pd.date_range('2018-01-01 00:00:00', freq='5s', periods=2)
+#         self.arr = JaggedKeyValueArray(
+#             self.keys,
+#             self.vals,
+#             self.bounds,
+#             index=self.index
+#         )
+#
+#     def test_get_resample_index_bounds(self):
+#         result = self.arr.get_resample_index_bounds('5s')
+#
+#         expected = np.array([
+#             [0, 2, 0, 2],
+#             [2, 2, 2, 2],  # empty
+#         ])
+#         np.testing.assert_array_equal(expected, result)
+#
+#     def test_get_ohlcv_frame(self):
+#         result = self.arr.get_ohlcv_frame('5s')
+#         print(result)
+#
+#         expected_index = pd.date_range('2018-01-01 00:00:00', freq='5s', periods=2)
+#         expected_values = [[580.0, 590.0, 580.0, 580.0, 3.0],
+#                            [np.nan, np.nan, np.nan, np.nan, 0.0]]
+#
+#         np.testing.assert_array_equal(expected_values, result.values)
+#         np.testing.assert_array_equal(['o', 'h', 'l', 'c', 'v'], result.columns)
+#         np.testing.assert_array_equal(expected_index, result.index)
+#
+#     def test_get_v(self):
+#         v = self.arr.get_v('5s')
+#
+#         expected = np.array([3, 0])
+#         np.testing.assert_array_equal(expected, v)
 
 
 class OHLCTests(unittest.TestCase):
