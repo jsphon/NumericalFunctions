@@ -29,12 +29,15 @@ class JaggedKeyValueSeries(object):
     roughly every 0.5 seconds, we might like to resample it to 1s or 5s intervals.
     """
 
-    def __init__(self, arr, index=None):
+    def __init__(self, arr=None, index=None, keys=None, values=None, bounds=None):
 
         if index is None:
             index = np.arange(len(arr)-1)
         elif isinstance(index, (list, tuple)):
             index = np.array(index)
+
+        if arr is None:
+            arr = JaggedKeyValueArray(keys=keys, values=values, bounds=bounds)
 
         self._verify(arr, index)
         self.arr = arr
@@ -56,7 +59,7 @@ class JaggedKeyValueSeries(object):
             return False
         if len(self) != len(other):
             return False
-        if np.not_equal(self.index, other.index):
+        if not np.array_equal(self.index, other.index):
             return False
         if self.arr!=other.arr:
             return False
@@ -107,11 +110,14 @@ class JaggedKeyValueSeries(object):
 
         if isinstance(i, INT_TYPES):
             ii = self.index.searchsorted(i)
+            print('i1 is %s' % ii)
             return self.arr[ii]
 
         if isinstance(i, slice):
             ii0 = self.index.searchsorted(i.start, side='left')
-            ii1 = self.index.searchsorted(i.start, side='right')
+            ii1 = self.index.searchsorted(i.stop, side='left')
+
+            print('ii0 is %s, ii1 is %s'%(ii0, ii1))
 
             new_index = self.index[ii0:ii1]
             new_array = self.arr[ii0:ii1]

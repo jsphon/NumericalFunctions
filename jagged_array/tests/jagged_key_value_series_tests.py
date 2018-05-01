@@ -9,9 +9,7 @@ import jagged_array.jagged_key_value_series as mod
 
 
 class ModuleTests(unittest.TestCase):
-
     def test_floor_to_nearest(self):
-
         x = np.array([-10, -6, -5, -3, 0, 1, 5, 9, 10, 11])
         expected = np.array([-10, -10, -5, -5, 0, 0, 5, 5, 10, 10])
 
@@ -41,7 +39,6 @@ def get_empty_jagged_key_value_series():
 
 
 class MoreJaggedKeyValueSeriesTests(unittest.TestCase):
-
     def setUp(self):
 
         k0 = [10, 11]
@@ -78,10 +75,28 @@ class MoreJaggedKeyValueSeriesTests(unittest.TestCase):
                 (3, [], []),
                 (5, [14], [8]),
         ):
-
             result = self.s[i]
             np.testing.assert_array_equal(k, result[0])
             np.testing.assert_array_equal(v, result[1])
+
+    def test__getitem__2ints(self):
+        for cfg in (
+                {
+                    'i0': -5,
+                    'i1': 0,
+                    'expected': JaggedKeyValueSeries(
+                        keys=[10, 11, 11, 12, 13],
+                        values=[1, 2, 3, 4, 5],
+                        bounds=[0, 2, 5],
+                        index=[-5, -3],
+                    )
+                },
+        ):
+            expected = cfg['expected']
+            result = self.s[cfg['i0']:cfg['i1']]
+            print(result.index)
+            self.assertEqual(expected, result)
+
 #
 #     def test_to_dense_slice_to_end(self):
 #         ''' Check that it works when the bounds start before/after the end'''

@@ -114,9 +114,9 @@ class JaggedKeyValueArray(object):
 
         if not np.array_equal(self.bounds, other.bounds):
             return False
-        if not np.array_equal(self.keys, other.keys):
+        if not np.array_equal(self.get_utilized_keys(), other.get_utilized_keys()):
             return False
-        if not np.array_equal(self.values, other.values):
+        if not np.array_equal(self.get_utilized_values(), other.get_utilized_values()):
             return False
 
         if (self.index is not None) or (other.index is not None):
@@ -355,15 +355,35 @@ class JaggedKeyValueArray(object):
 
         return result
 
-    def get_active_keys(self):
+    def get_unique_utilized_keys(self):
         """
         Return the keys that are used by a jagged array
 
         This is required, as if an array is a view of another, then some
         of the keys could be unused
         """
-        all_keys = self.keys[self.bounds[0]:self.bounds[-1]]
-        return np.unique(all_keys)
+        utilized_keys = self.get_utilized_keys()
+        return np.unique(utilized_keys)
+
+    def get_utilized_keys(self):
+        """
+        Return the keys that are actively used.
+
+        Due to slicing, it is possible that some of self.keys are not
+        used by this array.
+        :return:
+        """
+        return self.keys[self.bounds[0]:self.bounds[-1]]
+
+    def get_utilized_values(self):
+        """
+        Return the keys that are actively used.
+
+        Due to slicing, it is possible that some of self.keys are not
+        used by this array.
+        :return:
+        """
+        return self.values[self.bounds[0]:self.bounds[-1]]
 
     def get_resample_index_bounds(self, interval):
 
