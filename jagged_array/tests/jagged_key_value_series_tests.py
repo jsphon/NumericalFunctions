@@ -91,10 +91,20 @@ class MoreJaggedKeyValueSeriesTests(unittest.TestCase):
                         index=[-5, -3],
                     )
                 },
+                {
+                    'i0': 0,
+                    'i1': None,
+                    'expected': JaggedKeyValueSeries(
+                        keys=[12, 13, 14],
+                        values=[6, 7, 8],
+                        bounds=[0, 2, 2, 3],
+                        index=[0, 3, 5],
+                    )
+                },
         ):
             expected = cfg['expected']
             result = self.s[cfg['i0']:cfg['i1']]
-            print(result.index)
+
             self.assertEqual(expected, result)
 
 #

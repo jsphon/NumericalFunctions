@@ -112,16 +112,18 @@ class JaggedKeyValueArray(object):
         if len(self) != len(other):
             return False
 
-        if not np.array_equal(self.bounds, other.bounds):
-            return False
         if not np.array_equal(self.get_utilized_keys(), other.get_utilized_keys()):
             return False
         if not np.array_equal(self.get_utilized_values(), other.get_utilized_values()):
             return False
 
-        if (self.index is not None) or (other.index is not None):
-
-            return np.array_equal(self.index, other.index)
+        # Compare bounds relative to the first value, as if we have already
+        # check that the utilized keys and values are the same, then
+        # the relative bounds should be the same too
+        b0 = np.array(self.bounds)-self.bounds[0]
+        b1 = np.array(other.bounds)-other.bounds[0]
+        if not np.array_equal(b0, b1):
+            return False
 
         return True
 
@@ -174,12 +176,12 @@ class JaggedKeyValueArray(object):
 
         if isinstance(i, slice):
             s = slice(i.start, i.stop + 1 if i.stop else None, i.step)
-            if self.index is not None:
-                s1 = slice(i.start, i.stop if i.stop else None, i.step)
-                index = self.index[s1]
-            else:
-                index = None
-            return JaggedKeyValueArray(self.keys, self.values, self.bounds[s], index=index)
+            # if self.index is not None:
+            #     s1 = slice(i.start, i.stop if i.stop else None, i.step)
+            #     index = self.index[s1]
+            # else:
+            #     index = None
+            return JaggedKeyValueArray(self.keys, self.values, self.bounds[s])
 
         if isinstance(i, tuple):
             i0 = i[0]
