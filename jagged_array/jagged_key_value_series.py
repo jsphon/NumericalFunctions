@@ -63,18 +63,18 @@ class JaggedKeyValueSeries(object):
 
         return True
 
-    def loc(self, i):
-        """
-        like __getitem__, but using the index
-        :return:
-        """
-
-        index0 = self.index.searchsorted(i)
-        index1 = index0+1
-
-        i0 = self.bounds[index0]
-        i1 = self.bounds[index1]
-        return (self.keys[i0:i1], self.values[i0:i1])
+    # def loc(self, i):
+    #     """
+    #     like __getitem__, but using the index
+    #     :return:
+    #     """
+    #
+    #     index0 = self.index.searchsorted(i)
+    #     index1 = index0+1
+    #
+    #     i0 = self.bounds[index0]
+    #     i1 = self.bounds[index1]
+    #     return (self.keys[i0:i1], self.values[i0:i1])
     #
     # def loc_slice(self, first=None, last=None):
     #     """

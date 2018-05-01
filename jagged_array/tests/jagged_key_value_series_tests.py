@@ -69,6 +69,19 @@ class MoreJaggedKeyValueSeriesTests(unittest.TestCase):
     def test_bool_false(self):
         self.assertFalse(get_empty_jagged_key_value_series())
 
+    def test___getitem__int(self):
+
+        for i, k, v in (
+                (-5, [10, 11], [1, 2]),
+                (-3, [11, 12, 13], [3, 4, 5]),
+                (0, [12, 13], [6, 7]),
+                (3, [], []),
+                (5, [14], [8]),
+        ):
+
+            result = self.s[i]
+            np.testing.assert_array_equal(k, result[0])
+            np.testing.assert_array_equal(v, result[1])
 #
 #     def test_to_dense_slice_to_end(self):
 #         ''' Check that it works when the bounds start before/after the end'''
