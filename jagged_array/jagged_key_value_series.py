@@ -66,46 +66,6 @@ class JaggedKeyValueSeries(object):
 
         return True
 
-    # def loc(self, i):
-    #     """
-    #     like __getitem__, but using the index
-    #     :return:
-    #     """
-    #
-    #     index0 = self.index.searchsorted(i)
-    #     index1 = index0+1
-    #
-    #     i0 = self.bounds[index0]
-    #     i1 = self.bounds[index1]
-    #     return (self.keys[i0:i1], self.values[i0:i1])
-    #
-    # def loc_slice(self, first=None, last=None):
-    #     """
-    #     Like loc, with slicing
-    #     :param first:
-    #     :param last:
-    #     :return: JaggedKeyValueArray
-    #     """
-    #     if first is not None:
-    #         i0 = self.index.searchsorted(first)
-    #     else:
-    #         i0 = 0
-    #
-    #     if last is not None:
-    #         i1 = self.index.searchsorted(last)
-    #     else:
-    #         i1 = len(self.bounds)-1
-    #
-    #     keys = self.keys[self.bounds[i0]:self.bounds[i1]]
-    #     values = self.values[self.bounds[i0]:self.bounds[i1]]
-    #
-    #     return JaggedKeyValueArray(
-    #         keys,
-    #         values,
-    #         self.bounds[i0:i1+1] - self.bounds[i0],
-    #         index=self.index[i0:i1]
-    #     )
-
     def __getitem__(self, i):
 
         if isinstance(i, INT_TYPES):
@@ -133,12 +93,16 @@ class JaggedKeyValueSeries(object):
     def __repr__(self):
 
         if len(self) > 6:
-            rows0 = '\n'.join(['\t%s,%s,' % x for x in self[:3]])
-            rows1 = '\n'.join(['\t%s,%s,' % x for x in self[-4:]])
-            return '[\n%s\n\t...\n%s\n]' % (rows0, rows1)
+            top_rows = self._to_string(self.index[:3], self.arr[:3])
+            bottom_rows = self._to_string(self.index[-3:], self.arr[-4:])
+            return '[\n%s\n\t...\n%s\n]' % (top_rows, bottom_rows)
         else:
-            rows = '\n'.join(['\t%s,' % str(x) for x in self])
-            return '[\n%s\n]' % rows
+            return self._to_string(self.index, self.arr)
+
+    def _to_string(self, index, arr):
+        irows = zip(index, arr)
+        rows = ['\t%s, %s, %s' % (idx, k, v) for (idx, (k, v)) in irows]
+        return '\n'.join(rows)
 
     def cumsum(self):
         new_array = self.arr.cumsum()

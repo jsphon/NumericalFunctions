@@ -38,6 +38,38 @@ def get_empty_jagged_key_value_series():
     return JaggedKeyValueSeries(arr, index)
 
 
+class LongerJaggedKeyValueSeriesTests(unittest.TestCase):
+    def setUp(self):
+
+        k0 = [10, 11]
+        k1 = [11, 12, 13]
+        k2 = [12, 13]
+        k3 = []
+        k4 = [14]
+        k5 = [10, 11]
+        k6 = [11, 12, 13]
+
+        v0 = [1, 2]
+        v1 = [3, 4, 5]
+        v2 = [6, 7]
+        v3 = []
+        v4 = [8]
+        v5 = [1, 2]
+        v6 = [3, 4, 5]
+
+        keys = k0 + k1 + k2 + k3 + k4 + k5 + k6
+        vals = v0 + v1 + v2 + v3 + v4 + v5 + v6
+        bounds = [0, 2, 5, 7, 7, 8, 10, 13]
+        arr = JaggedKeyValueArray(keys, vals, bounds)
+        index = [-5, -3, 0, 3, 5, 7, 9]
+        self.s = JaggedKeyValueSeries(arr, index)
+
+    def test___repr__(self):
+        result = str(self.s)
+        print(result)
+
+
+
 class JaggedKeyValueSeriesTests(unittest.TestCase):
     def setUp(self):
 
@@ -117,6 +149,18 @@ class JaggedKeyValueSeriesTests(unittest.TestCase):
 
             self.assertEqual(expected, result)
 
+    def test_cumsum(self):
+        result = self.s.cumsum()
+
+        JaggedKeyValueSeries(
+            keys=[10, 11, 11, 12, 13],
+            values=[1, 2, 3, 4, 5],
+            bounds=[0, 2, 5],
+            index=[-5, -3],
+        )
+        print(result)
+        #print(result.arr)
+        self.fail()
 #
 #     def test_to_dense_slice_to_end(self):
 #         ''' Check that it works when the bounds start before/after the end'''
