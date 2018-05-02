@@ -150,17 +150,23 @@ class JaggedKeyValueSeriesTests(unittest.TestCase):
             self.assertEqual(expected, result)
 
     def test_cumsum(self):
-        result = self.s.cumsum()
+        """
+        Assert that cumsum works, though we only slice on the
+        first 2 levels in order to keep it short.
 
-        JaggedKeyValueSeries(
-            keys=[10, 11, 11, 12, 13],
-            values=[1, 2, 3, 4, 5],
-            bounds=[0, 2, 5],
+        Remember that s[:0] will include indices -5 and -3, but not 0
+        :return:
+        """
+        result = self.s[:0].cumsum()
+
+        expected = JaggedKeyValueSeries(
+            keys=[10, 11, 10, 11, 12, 13,],
+            values=[1, 2, 1, 5, 4, 5],
+            bounds=[0, 2, 6],
             index=[-5, -3],
         )
-        print(result)
-        #print(result.arr)
-        self.fail()
+
+        self.assertEqual(expected, result)
 #
 #     def test_to_dense_slice_to_end(self):
 #         ''' Check that it works when the bounds start before/after the end'''

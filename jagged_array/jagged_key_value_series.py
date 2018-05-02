@@ -94,7 +94,7 @@ class JaggedKeyValueSeries(object):
 
         if len(self) > 6:
             top_rows = self._to_string(self.index[:3], self.arr[:3])
-            bottom_rows = self._to_string(self.index[-3:], self.arr[-4:])
+            bottom_rows = self._to_string(self.index[-3:], self.arr[-3:])
             return '[\n%s\n\t...\n%s\n]' % (top_rows, bottom_rows)
         else:
             return self._to_string(self.index, self.arr)
