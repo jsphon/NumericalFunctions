@@ -113,10 +113,7 @@ class JaggedKeyValueSeriesTests(unittest.TestCase):
                 },
         ):
             expected = cfg['expected']
-            if cfg['i0'] is None:
-                result = self.s[:cfg['i1']]
-            else:
-                result = self.s[cfg['i0']:cfg['i1']]
+            result = self.s[cfg['i0']:cfg['i1']]
 
             self.assertEqual(expected, result)
 
