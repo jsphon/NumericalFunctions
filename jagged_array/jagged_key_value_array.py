@@ -4,14 +4,12 @@ Created on 1 Aug 2015
 @author: jon
 '''
 
-
 import datetime
 from collections import defaultdict
 
 import numba as nb
 import pandas as pd
 import numpy as np
-
 
 from jagged_array.jagged_array import JaggedArray
 from numerical_functions import numba_funcs as nf
@@ -21,7 +19,6 @@ DEFAULT_DTYPE = np.float32
 
 
 class JaggedKeyValueArray(object):
-
     def __init__(self, keys, values, bounds, dtype=None, index=None, date_index=None):
 
         dtype = dtype or DEFAULT_DTYPE
@@ -47,7 +44,7 @@ class JaggedKeyValueArray(object):
             else:
                 self.index = index
         else:
-            self.index = np.arange(len(self.bounds)-1)
+            self.index = np.arange(len(self.bounds) - 1)
 
         self.date_index = date_index
 
@@ -120,8 +117,8 @@ class JaggedKeyValueArray(object):
         # Compare bounds relative to the first value, as if we have already
         # check that the utilized keys and values are the same, then
         # the relative bounds should be the same too
-        b0 = np.array(self.bounds)-self.bounds[0]
-        b1 = np.array(other.bounds)-other.bounds[0]
+        b0 = np.array(self.bounds) - self.bounds[0]
+        b1 = np.array(other.bounds) - other.bounds[0]
         if not np.array_equal(b0, b1):
             return False
 
@@ -134,7 +131,7 @@ class JaggedKeyValueArray(object):
         """
 
         index0 = self.index.searchsorted(i)
-        index1 = index0+1
+        index1 = index0 + 1
 
         i0 = self.bounds[index0]
         i1 = self.bounds[index1]
@@ -155,7 +152,7 @@ class JaggedKeyValueArray(object):
         if last is not None:
             i1 = self.index.searchsorted(last)
         else:
-            i1 = len(self.bounds)-1
+            i1 = len(self.bounds) - 1
 
         keys = self.keys[self.bounds[i0]:self.bounds[i1]]
         values = self.values[self.bounds[i0]:self.bounds[i1]]
@@ -163,24 +160,23 @@ class JaggedKeyValueArray(object):
         return JaggedKeyValueArray(
             keys,
             values,
-            self.bounds[i0:i1+1] - self.bounds[i0],
+            self.bounds[i0:i1 + 1] - self.bounds[i0],
             index=self.index[i0:i1]
         )
 
     def __getitem__(self, i):
 
         if isinstance(i, INT_TYPES):
-            i0 = self.bounds[i]
-            i1 = self.bounds[i + 1]
-            return (self.keys[i0:i1], self.values[i0:i1])
+            if i >= 0:
+                i0 = self.bounds[i]
+                i1 = self.bounds[i + 1]
+            else:
+                i0 = self.bounds[i - 1]
+                i1 = self.bounds[i]
+            return self.keys[i0:i1], self.values[i0:i1]
 
         if isinstance(i, slice):
             s = slice(i.start, i.stop + 1 if i.stop else None, i.step)
-            # if self.index is not None:
-            #     s1 = slice(i.start, i.stop if i.stop else None, i.step)
-            #     index = self.index[s1]
-            # else:
-            #     index = None
             return JaggedKeyValueArray(self.keys, self.values, self.bounds[s])
 
         if isinstance(i, tuple):
@@ -335,12 +331,12 @@ class JaggedKeyValueArray(object):
 
             open0 = resampled_bounds[i, 0]
             open1 = resampled_bounds[i, 1]
-            close0 = resampled_bounds[i,2]
+            close0 = resampled_bounds[i, 2]
             close1 = resampled_bounds[i, 3]
 
             # High and Low
             all_values = self.keys[open0:close1]
-            if close1>open0:
+            if close1 > open0:
                 result[i, 1] = all_values.max()
                 result[i, 2] = all_values.min()
             else:
@@ -411,9 +407,9 @@ class JaggedKeyValueArray(object):
         i1 = np.where(np.diff(floored_index))[0] + 1
         i0 = np.array([0])
         open_bound_start_indices = np.r_[i0, i1]
-        open_bound_end_indices = open_bound_start_indices+1
+        open_bound_end_indices = open_bound_start_indices + 1
 
-        close_bound_start_indices = open_bound_start_indices[1:]-1
+        close_bound_start_indices = open_bound_start_indices[1:] - 1
         close_bound_end_indices = close_bound_start_indices + 1
 
         result = np.empty((len(open_bound_start_indices), 4), dtype=np.int)
@@ -466,9 +462,9 @@ class JaggedKeyValueArray(object):
         lower_bound = self.bounds[0]
         for i in range(l):
             b0 = self.bounds[i]
-            b1 = self.bounds[i+1]
-            i0 = b0-lower_bound
-            i1 = b1-lower_bound
+            b1 = self.bounds[i + 1]
+            i0 = b0 - lower_bound
+            i1 = b1 - lower_bound
             index[i0:i1] = self.index[i]
 
         values = self.values[self.bounds[0]:self.bounds[-1]]
@@ -493,9 +489,9 @@ class JaggedKeyValueArray(object):
         old_row = np.zeros_like(unique_keys, dtype=np.int)
 
         row_diffs = []
-        for i in indices[1:]-1:
+        for i in indices[1:] - 1:
             row = data[i]
-            row_diff = row-old_row
+            row_diff = row - old_row
             row_diffs.append(row_diff)
             old_row = row
 
@@ -580,7 +576,7 @@ def floor_to_nearest_int(x, multiplier):
     :return:
     """
 
-    return multiplier * (x//multiplier)
+    return multiplier * (x // multiplier)
 
 
 def get_change_indices(x):

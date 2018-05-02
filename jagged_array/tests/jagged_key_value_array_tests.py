@@ -77,7 +77,7 @@ class MoreJaggedKeyValueArrayTests(unittest.TestCase):
         np.testing.assert_array_equal(expected_v, v)
         np.testing.assert_array_equal(expected_k, k)
 
-    def test_get_active_keys(self):
+    def test_get_utilized_keys(self):
         keys = [0, 1, 2, 3, 4, 5]
         vals = [10, 11, 12, 13, 15]
 
@@ -85,7 +85,7 @@ class MoreJaggedKeyValueArrayTests(unittest.TestCase):
 
         arr = JaggedKeyValueArray(keys, vals, bounds)
 
-        result = arr.get_active_keys()
+        result = arr.get_utilized_keys()
         expected = np.array([2, 3, 4])
         np.testing.assert_array_equal(expected, result)
 
@@ -215,6 +215,15 @@ class JaggedKeyValueArrayTests(unittest.TestCase):
 
         e0 = np.array(self.k1)
         e1 = np.array(self.v1)
+
+        np.testing.assert_array_equal(e0, r[0])
+        np.testing.assert_array_equal(e1, r[1])
+
+    def test__getitem_rowneg1(self):
+        r = self.arr[-1]
+
+        e0 = np.array(self.k2)
+        e1 = np.array(self.v2)
 
         np.testing.assert_array_equal(e0, r[0])
         np.testing.assert_array_equal(e1, r[1])
