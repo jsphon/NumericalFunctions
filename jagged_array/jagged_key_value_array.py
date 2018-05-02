@@ -176,7 +176,10 @@ class JaggedKeyValueArray(object):
             return self.keys[i0:i1], self.values[i0:i1]
 
         if isinstance(i, slice):
-            s = slice(i.start, i.stop + 1 if i.stop else None, i.step)
+            if i.start and i.start<0:
+                s = slice(i.start-1, i.stop if i.stop else None, i.step)
+            else:
+                s = slice(i.start, i.stop + 1 if i.stop else None, i.step)
             return JaggedKeyValueArray(self.keys, self.values, self.bounds[s])
 
         if isinstance(i, tuple):

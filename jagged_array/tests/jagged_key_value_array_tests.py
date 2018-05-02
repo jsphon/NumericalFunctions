@@ -245,6 +245,21 @@ class JaggedKeyValueArrayTests(unittest.TestCase):
         self.assertEqual(3, r.bounds[1])
         self.assertEqual(6, r.bounds[2])
 
+    def test__getitem_1dslice_neg1(self):
+        r = self.arr[-1:]
+        print('test__getitem_1dslice_neg1: %s' % r)
+        self.assertIsInstance(r, JaggedKeyValueArray)
+        self.assertEqual(1, len(r))
+        self.assertEqual(3, r.bounds[0])
+        self.assertEqual(6, r.bounds[1])
+
+    def test__getitem_1dslice_neg2(self):
+        r = self.arr[-3:-1]
+        print('test__getitem_1dslice_neg2: %s' % r)
+        self.assertIsInstance(r, JaggedKeyValueArray)
+        self.assertEqual(2, len(r))
+        np.testing.assert_array_equal([0, 1, 3], r.bounds)
+
     def test___getitem__2dslice(self):
         k, v = self.arr[0, 0]
         self.assertEqual(11, k)
