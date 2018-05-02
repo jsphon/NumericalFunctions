@@ -114,7 +114,11 @@ class JaggedKeyValueSeries(object):
             return self.arr[ii]
 
         if isinstance(i, slice):
-            ii0 = self.index.searchsorted(i.start, side='left')
+            if i.start is None:
+                ii0 = 0
+            else:
+                ii0 = self.index.searchsorted(i.start, side='left')
+
             if i.stop is None:
                 ii1 = len(self.index)
             else:

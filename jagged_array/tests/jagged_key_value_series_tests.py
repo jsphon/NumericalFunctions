@@ -38,7 +38,7 @@ def get_empty_jagged_key_value_series():
     return JaggedKeyValueSeries(arr, index)
 
 
-class MoreJaggedKeyValueSeriesTests(unittest.TestCase):
+class JaggedKeyValueSeriesTests(unittest.TestCase):
     def setUp(self):
 
         k0 = [10, 11]
@@ -101,9 +101,22 @@ class MoreJaggedKeyValueSeriesTests(unittest.TestCase):
                         index=[0, 3, 5],
                     )
                 },
+                {
+                    'i0': None,
+                    'i1': 0,
+                    'expected': JaggedKeyValueSeries(
+                        keys=[10, 11, 11, 12, 13],
+                        values=[1, 2, 3, 4, 5],
+                        bounds=[0, 2, 5],
+                        index=[-5, -3],
+                    )
+                },
         ):
             expected = cfg['expected']
-            result = self.s[cfg['i0']:cfg['i1']]
+            if cfg['i0'] is None:
+                result = self.s[:cfg['i1']]
+            else:
+                result = self.s[cfg['i0']:cfg['i1']]
 
             self.assertEqual(expected, result)
 
