@@ -92,6 +92,16 @@ class JaggedKeyValueSeriesTests(unittest.TestCase):
         index = [-5, -3, 0, 3, 5]
         self.s = JaggedKeyValueSeries(arr, index)
 
+    def test_get_resample_index_bounds(self):
+        result = self.s.get_resample_index_bounds(5)
+        expected = np.array([
+            [0, 2, 2, 5],
+            [5, 7, 7, 7],
+            [7, 8, 7, 8],
+        ])
+
+        np.testing.assert_array_equal(expected, result)
+
     def test_bool_true(self):
         self.assertTrue(self.s)
 

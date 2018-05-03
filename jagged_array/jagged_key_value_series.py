@@ -224,12 +224,12 @@ class JaggedKeyValueSeries(object):
         close_bound_end_indices = close_bound_start_indices + 1
 
         result = np.empty((len(open_bound_start_indices), 4), dtype=np.int)
-        result[:, 0] = self.bounds[open_bound_start_indices]
-        result[:, 1] = self.bounds[open_bound_end_indices]
-        result[:-1, 2] = self.bounds[close_bound_start_indices]
-        result[-1, 2] = self.bounds[-2]
-        result[:-1, 3] = self.bounds[close_bound_end_indices]
-        result[-1, 3] = self.bounds[-1]
+        result[:, 0] = self.arr.bounds[open_bound_start_indices]
+        result[:, 1] = self.arr.bounds[open_bound_end_indices]
+        result[:-1, 2] = self.arr.bounds[close_bound_start_indices]
+        result[-1, 2] = self.arr.bounds[-2]
+        result[:-1, 3] = self.arr.bounds[close_bound_end_indices]
+        result[-1, 3] = self.arr.bounds[-1]
 
         return result
 
