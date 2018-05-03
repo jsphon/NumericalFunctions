@@ -90,6 +90,17 @@ class JaggedKeyValueSeriesTests(unittest.TestCase):
         index = [-5, -3, 0, 3, 5]
         self.s = JaggedKeyValueSeries(arr, index)
 
+    def test_load_save(self):
+
+        with tempfile.TemporaryFile() as f:
+            self.s.save(f)
+
+            f.seek(0)
+
+            s2 = JaggedKeyValueSeries.load(f)
+
+        self.assertEqual(self.s, s2)
+
     def test_resample(self):
 
         result = self.s.resample(5)
@@ -100,7 +111,6 @@ class JaggedKeyValueSeriesTests(unittest.TestCase):
             bounds=[0, 4, 6, 7],
             index=[-5, 0, 5],
         )
-        print(result)
         self.assertEqual(expected, result)
 
     def test_ravel(self):

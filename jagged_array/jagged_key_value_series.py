@@ -290,12 +290,12 @@ class JaggedKeyValueSeries(object):
     def load(filename):
 
         with np.load(filename) as data:
-            pdata = data['keys']
-            sdata = data['values']
-            bdata = data['bounds']
-            index = data['index']
-
-            return JaggedKeyValueSeries(pdata, sdata, bdata, index)
+            return JaggedKeyValueSeries(
+                keys = data['keys'],
+                values = data['values'],
+                bounds = data['bounds'],
+                index = data['index'],
+            )
 
     def save(self, filename):
         """
@@ -303,13 +303,13 @@ class JaggedKeyValueSeries(object):
         :return:
         """
 
-        data = {}
-        data['keys'] = self.keys
-        data['values'] = self.values
-        data['bounds'] = self.bounds
-        data['index'] = self.index
-
-        np.savez_compressed(filename, **data)
+        np.savez_compressed(
+            filename,
+            keys = self.arr.keys,
+            values = self.arr.values,
+            bounds = self.arr.bounds,
+            index = self.index
+        )
 
 
 def modified_median(x):
