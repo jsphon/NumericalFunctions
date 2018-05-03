@@ -6,6 +6,34 @@ from jagged_array.jagged_key_value_array import JaggedKeyValueArray
 
 
 class MoreJaggedKeyValueArrayTests(unittest.TestCase):
+
+    def test___repr__(self):
+
+        k0 = [10, 11]
+        k1 = [11, 12, 13]
+        k2 = [12, 13]
+        k3 = []
+        k4 = [14]
+        k5 = [10, 11]
+        k6 = [11, 12, 13]
+
+        v0 = [1, 2]
+        v1 = [3, 4, 5]
+        v2 = [6, 7]
+        v3 = []
+        v4 = [8]
+        v5 = [1, 2]
+        v6 = [3, 4, 5]
+
+        keys = k0 + k1 + k2 + k3 + k4 + k5 + k6
+        vals = v0 + v1 + v2 + v3 + v4 + v5 + v6
+        bounds = [0, 2, 5, 7, 7, 8, 10, 13]
+        arr = JaggedKeyValueArray(keys, vals, bounds)
+
+        result = str(arr)
+        print(result)
+        self.assertIsInstance(str(result))
+
     def test_to_dense_slice_from_beginning(self):
         ''' Check that it works when the bounds start before/after the end'''
         k0 = [10, 11]
