@@ -161,16 +161,6 @@ class JaggedKeyValueSeries(object):
         resampled_bounds = self.get_resample_index_bounds(interval)
         return self._get_ohlc(resampled_bounds)
 
-    # def get_ohlc_by_date_index(self, freq):
-    #     """
-    #     Convert this array into Open/High/Low/Close bars
-    #     :param freq:
-    #     :return:
-    #     """
-    #
-    #     resampled_bounds = self.get_resample_date_index_bounds(freq)
-    #     return self._get_ohlc(resampled_bounds)
-
     def _get_ohlc(self, resampled_bounds):
 
         # Needs to be a float so that we can have nans
@@ -218,20 +208,6 @@ class JaggedKeyValueSeries(object):
         floored = self.index // interval
         return self._get_resample_bounds(floored)
 
-    # def get_resample_date_index_bounds(self, freq):
-    #     """
-    #     Return a matrix of indices used for resampling
-    #
-    #
-    #     columns represent (open0, open1, close0, close1)
-    #     :param date_range:
-    #     :param freq:
-    #     :return:
-    #     """
-    #
-    #     floored = self.date_index.floor(freq)
-    #     return self._get_resample_bounds(floored)
-
     def _get_resample_bounds(self, floored_index):
 
         i1 = np.where(np.diff(floored_index))[0] + 1
@@ -253,31 +229,6 @@ class JaggedKeyValueSeries(object):
 
         return result
 
-    def get_v_by_date_index(self, freq):
-        indices = get_resampled_datetime_index(self.date_index, freq)
-        return self._get_resampled_v(indices)
-
-    def get_v_by_index(self, freq):
-
-        indices = get_resample_indices(self.index, freq)
-        return self._get_resampled_v(indices)
-
-    def _get_resampled_v(self, indices):
-
-        result = np.ndarray(len(indices), dtype=self.values.dtype)
-
-        extended_indices = np.append(indices, len(self.bounds))
-        extended_bounds = np.append(self.bounds, len(self.values))
-        for i in range(0, len(indices)):
-            open_index0 = extended_bounds[extended_indices[i]]
-            closing_index1 = extended_bounds[extended_indices[i + 1]]
-
-            # High and Low
-            all_values = self.values[open_index0:closing_index1]
-            result[i] = all_values.sum()
-
-        return result
-
     def ravel(self):
         """
         Return a representation consisting of 3 arrays
@@ -287,19 +238,19 @@ class JaggedKeyValueSeries(object):
         :return:
         """
 
-        l = len(self)
-        length = self.bounds[-1] - self.bounds[0]
+        bounds = self.arr.bounds
+        length = bounds[-1] - bounds[0]
         index = np.ndarray(length, dtype=self.index.dtype)
-        lower_bound = self.bounds[0]
-        for i in range(l):
-            b0 = self.bounds[i]
-            b1 = self.bounds[i + 1]
+        lower_bound = bounds[0]
+        for i in range(len(self)):
+            b0 = bounds[i]
+            b1 = bounds[i + 1]
             i0 = b0 - lower_bound
             i1 = b1 - lower_bound
             index[i0:i1] = self.index[i]
 
-        values = self.values[self.bounds[0]:self.bounds[-1]]
-        keys = self.keys[self.bounds[0]:self.bounds[-1]]
+        values = self.arr.values[bounds[0]:bounds[-1]]
+        keys = self.arr.keys[bounds[0]:bounds[-1]]
 
         return index, keys, values
 

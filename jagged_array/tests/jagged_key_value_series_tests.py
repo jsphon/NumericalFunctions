@@ -91,6 +91,14 @@ class JaggedKeyValueSeriesTests(unittest.TestCase):
         index = [-5, -3, 0, 3, 5]
         self.s = JaggedKeyValueSeries(arr, index)
 
+    def test_ravel(self):
+
+        index, keys, values = self.s.ravel()
+
+        np.testing.assert_array_equal([-5, -5, -3, -3, -3, 0, 0, 5], index)
+        np.testing.assert_array_equal([10, 11, 11, 12, 13, 12, 13, 14], keys)
+        np.testing.assert_array_equal([1, 2, 3, 4, 5, 6, 7, 8], values)
+
     def test_get_v(self):
 
         result = self.s.get_v(5)
@@ -112,7 +120,7 @@ class JaggedKeyValueSeriesTests(unittest.TestCase):
         np.testing.assert_array_equal(expected, result)
 
     def test_get_resample_index_bounds(self):
-        result = self.s.get_resample_index_bounds()
+        result = self.s.get_resample_index_bounds(5)
         expected = np.array([
             [0, 2, 2, 5],
             [5, 7, 7, 7],
