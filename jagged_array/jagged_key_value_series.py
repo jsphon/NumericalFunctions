@@ -132,25 +132,44 @@ class JaggedKeyValueSeries(object):
     #     df['v'] = v
     #     return df
 
-    def get_ohlc_by_interval(self, freq):
+    def get_v(self, interval):
         """
         Convert this array into Open/High/Low/Close bars
         :param freq:
         :return:
         """
+        resampled_bounds = self.get_resample_index_bounds(interval)
+        return self._get_v(resampled_bounds)
 
-        resampled_bounds = self.get_resample_index_bounds(freq)
-        return self._get_ohlc(resampled_bounds)
+    def _get_v(self, resampled_bounds):
 
-    def get_ohlc_by_date_index(self, freq):
+        result = np.zeros(len(resampled_bounds), dtype=self.arr.values.dtype)
+
+        for i in range(0, len(resampled_bounds)):
+            open0 = resampled_bounds[i, 0]
+            close1 = resampled_bounds[i, 3]
+            result[i] = self.arr.values[open0:close1].sum()
+
+        return result
+
+    def get_ohlc(self, interval):
         """
         Convert this array into Open/High/Low/Close bars
         :param freq:
         :return:
         """
-
-        resampled_bounds = self.get_resample_date_index_bounds(freq)
+        resampled_bounds = self.get_resample_index_bounds(interval)
         return self._get_ohlc(resampled_bounds)
+
+    # def get_ohlc_by_date_index(self, freq):
+    #     """
+    #     Convert this array into Open/High/Low/Close bars
+    #     :param freq:
+    #     :return:
+    #     """
+    #
+    #     resampled_bounds = self.get_resample_date_index_bounds(freq)
+    #     return self._get_ohlc(resampled_bounds)
 
     def _get_ohlc(self, resampled_bounds):
 
@@ -166,8 +185,8 @@ class JaggedKeyValueSeries(object):
             close1 = resampled_bounds[i, 3]
 
             # High and Low
-            all_values = self.keys[open0:close1]
             if close1 > open0:
+                all_values = self.arr.keys[open0:close1]
                 result[i, 1] = all_values.max()
                 result[i, 2] = all_values.min()
             else:
@@ -175,11 +194,11 @@ class JaggedKeyValueSeries(object):
                 result[i, 2] = np.nan
 
             # Open
-            opening_values = self.keys[open0:open1]
+            opening_values = self.arr.keys[open0:open1]
             result[i, 0] = modified_median(opening_values)
 
             # Close
-            closing_values = self.keys[close0:close1]
+            closing_values = self.arr.keys[close0:close1]
             result[i, 3] = modified_median(closing_values)
 
         return result
@@ -199,24 +218,25 @@ class JaggedKeyValueSeries(object):
         floored = self.index // interval
         return self._get_resample_bounds(floored)
 
-    def get_resample_date_index_bounds(self, freq):
-        """
-        Return a matrix of indices used for resampling
-
-
-        columns represent (open0, open1, close0, close1)
-        :param date_range:
-        :param freq:
-        :return:
-        """
-
-        floored = self.date_index.floor(freq)
-        return self._get_resample_bounds(floored)
+    # def get_resample_date_index_bounds(self, freq):
+    #     """
+    #     Return a matrix of indices used for resampling
+    #
+    #
+    #     columns represent (open0, open1, close0, close1)
+    #     :param date_range:
+    #     :param freq:
+    #     :return:
+    #     """
+    #
+    #     floored = self.date_index.floor(freq)
+    #     return self._get_resample_bounds(floored)
 
     def _get_resample_bounds(self, floored_index):
 
         i1 = np.where(np.diff(floored_index))[0] + 1
         i0 = np.array([0])
+
         open_bound_start_indices = np.r_[i0, i1]
         open_bound_end_indices = open_bound_start_indices + 1
 

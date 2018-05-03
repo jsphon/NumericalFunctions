@@ -69,7 +69,6 @@ class LongerJaggedKeyValueSeriesTests(unittest.TestCase):
         print(result)
 
 
-
 class JaggedKeyValueSeriesTests(unittest.TestCase):
     def setUp(self):
 
@@ -92,8 +91,28 @@ class JaggedKeyValueSeriesTests(unittest.TestCase):
         index = [-5, -3, 0, 3, 5]
         self.s = JaggedKeyValueSeries(arr, index)
 
+    def test_get_v(self):
+
+        result = self.s.get_v(5)
+
+        expected = np.array([15, 13, 8])
+
+        np.testing.assert_array_equal(expected, result)
+
+    def test_get_ohlc(self):
+
+        result = self.s.get_ohlc(5)
+
+        expected = np.array([
+            [10, 13, 10, 12],
+            [12, 13, 12, np.nan],
+            [14, 14, 14, 14],
+        ])
+
+        np.testing.assert_array_equal(expected, result)
+
     def test_get_resample_index_bounds(self):
-        result = self.s.get_resample_index_bounds(5)
+        result = self.s.get_resample_index_bounds()
         expected = np.array([
             [0, 2, 2, 5],
             [5, 7, 7, 7],
