@@ -39,16 +39,6 @@ class JaggedKeyValueArray(object):
         else:
             self.bounds = np.array(bounds, dtype=np.int)
 
-        # if index is not None:
-        #     if isinstance(index, (list, tuple)):
-        #         self.index = np.array(index)
-        #     else:
-        #         self.index = index
-        # else:
-        #     self.index = np.arange(len(self.bounds) - 1)
-        #
-        # self.date_index = date_index
-
     @staticmethod
     def from_lists(key_list, val_list, keys_dtype=None, values_dtype=None):#, dtype=None):
         """ Make a JaggedKeyValueArray from key and value list of lists
@@ -73,9 +63,9 @@ class JaggedKeyValueArray(object):
         )
 
     @staticmethod
-    def from_dense_nb(data, cols):  # , dtype=np.int ):
+    def from_dense_nb(data, cols):
         """ Make a JaggedKeyValueArray from a dense array """
-        keys, values, bounds = _from_dense_nb(data, cols)  # , dtype)
+        keys, values, bounds = _from_dense_nb(data, cols)
         n = bounds[-1]
         return JaggedKeyValueArray(keys[:n], values[:n], bounds)
 
@@ -135,46 +125,6 @@ class JaggedKeyValueArray(object):
             return False
 
         return True
-
-    def loc(self, i):
-        """
-        like __getitem__, but using the index
-        :return:
-        """
-
-        index0 = self.index.searchsorted(i)
-        index1 = index0 + 1
-
-        i0 = self.bounds[index0]
-        i1 = self.bounds[index1]
-        return (self.keys[i0:i1], self.values[i0:i1])
-
-    def loc_slice(self, first=None, last=None):
-        """
-        Like loc, with slicing
-        :param first:
-        :param last:
-        :return: JaggedKeyValueArray
-        """
-        if first is not None:
-            i0 = self.index.searchsorted(first)
-        else:
-            i0 = 0
-
-        if last is not None:
-            i1 = self.index.searchsorted(last)
-        else:
-            i1 = len(self.bounds) - 1
-
-        keys = self.keys[self.bounds[i0]:self.bounds[i1]]
-        values = self.values[self.bounds[i0]:self.bounds[i1]]
-
-        return JaggedKeyValueArray(
-            keys,
-            values,
-            self.bounds[i0:i1 + 1] - self.bounds[i0],
-            index=self.index[i0:i1]
-        )
 
     def __getitem__(self, i):
 
@@ -292,82 +242,6 @@ class JaggedKeyValueArray(object):
         else:
             return JaggedKeyValueArray([], [], [])
 
-    def get_ohlcv_frame_by_interval(self, freq):
-        resampled_index = get_resample_indices(self.index, freq)
-        ohlc = self.get_ohlc_by_interval(freq)
-        v = self.get_v_by_index(freq)
-        df = pd.DataFrame(
-            ohlc,
-            index=resampled_index,
-            columns=['o', 'h', 'l', 'c']
-        )
-        df['v'] = v
-        return df
-
-    def get_ohlcv_frame_by_date_index(self, freq):
-        resampled_index = get_resampled_datetime_index(self.date_index, freq)
-        ohlc = self.get_ohlc_by_date_index(freq)
-        v = self.get_v_by_date_index(freq)
-        df = pd.DataFrame(
-            ohlc,
-            index=resampled_index,
-            columns=['o', 'h', 'l', 'c']
-        )
-        df['v'] = v
-        return df
-
-    def get_ohlc_by_interval(self, freq):
-        """
-        Convert this array into Open/High/Low/Close bars
-        :param freq:
-        :return:
-        """
-
-        resampled_bounds = self.get_resample_index_bounds(freq)
-        return self._get_ohlc(resampled_bounds)
-
-    def get_ohlc_by_date_index(self, freq):
-        """
-        Convert this array into Open/High/Low/Close bars
-        :param freq:
-        :return:
-        """
-
-        resampled_bounds = self.get_resample_date_index_bounds(freq)
-        return self._get_ohlc(resampled_bounds)
-
-    def _get_ohlc(self, resampled_bounds):
-
-        # Needs to be a float so that we can have nans
-        result = np.empty((len(resampled_bounds), 4), dtype=np.float)
-        result[:] = np.nan
-
-        for i in range(0, len(resampled_bounds)):
-
-            open0 = resampled_bounds[i, 0]
-            open1 = resampled_bounds[i, 1]
-            close0 = resampled_bounds[i, 2]
-            close1 = resampled_bounds[i, 3]
-
-            # High and Low
-            all_values = self.keys[open0:close1]
-            if close1 > open0:
-                result[i, 1] = all_values.max()
-                result[i, 2] = all_values.min()
-            else:
-                result[i, 1] = np.nan
-                result[i, 2] = np.nan
-
-            # Open
-            opening_values = self.keys[open0:open1]
-            result[i, 0] = modified_median(opening_values)
-
-            # Close
-            closing_values = self.keys[close0:close1]
-            result[i, 3] = modified_median(closing_values)
-
-        return result
-
     def get_unique_utilized_keys(self):
         """
         Return the keys that are used by a jagged array
@@ -397,127 +271,6 @@ class JaggedKeyValueArray(object):
         :return:
         """
         return self.values[self.bounds[0]:self.bounds[-1]]
-
-    def get_resample_index_bounds(self, interval):
-
-        floored = self.index // interval
-        return self._get_resample_bounds(floored)
-
-    def get_resample_date_index_bounds(self, freq):
-        """
-        Return a matrix of indices used for resampling
-
-
-        columns represent (open0, open1, close0, close1)
-        :param date_range:
-        :param freq:
-        :return:
-        """
-
-        floored = self.date_index.floor(freq)
-        return self._get_resample_bounds(floored)
-
-    def _get_resample_bounds(self, floored_index):
-
-        i1 = np.where(np.diff(floored_index))[0] + 1
-        i0 = np.array([0])
-        open_bound_start_indices = np.r_[i0, i1]
-        open_bound_end_indices = open_bound_start_indices + 1
-
-        close_bound_start_indices = open_bound_start_indices[1:] - 1
-        close_bound_end_indices = close_bound_start_indices + 1
-
-        result = np.empty((len(open_bound_start_indices), 4), dtype=np.int)
-        result[:, 0] = self.bounds[open_bound_start_indices]
-        result[:, 1] = self.bounds[open_bound_end_indices]
-        result[:-1, 2] = self.bounds[close_bound_start_indices]
-        result[-1, 2] = self.bounds[-2]
-        result[:-1, 3] = self.bounds[close_bound_end_indices]
-        result[-1, 3] = self.bounds[-1]
-
-        return result
-
-    def get_v_by_date_index(self, freq):
-        indices = get_resampled_datetime_index(self.date_index, freq)
-        return self._get_resampled_v(indices)
-
-    def get_v_by_index(self, freq):
-
-        indices = get_resample_indices(self.index, freq)
-        return self._get_resampled_v(indices)
-
-    def _get_resampled_v(self, indices):
-
-        result = np.ndarray(len(indices), dtype=self.values.dtype)
-
-        extended_indices = np.append(indices, len(self.bounds))
-        extended_bounds = np.append(self.bounds, len(self.values))
-        for i in range(0, len(indices)):
-            open_index0 = extended_bounds[extended_indices[i]]
-            closing_index1 = extended_bounds[extended_indices[i + 1]]
-
-            # High and Low
-            all_values = self.values[open_index0:closing_index1]
-            result[i] = all_values.sum()
-
-        return result
-
-    def ravel(self):
-        """
-        Return a representation consisting of 3 arrays
-         - index
-         - keys
-         - values
-        :return:
-        """
-
-        l = len(self)
-        length = self.bounds[-1] - self.bounds[0]
-        index = np.ndarray(length, dtype=self.index.dtype)
-        lower_bound = self.bounds[0]
-        for i in range(l):
-            b0 = self.bounds[i]
-            b1 = self.bounds[i + 1]
-            i0 = b0 - lower_bound
-            i1 = b1 - lower_bound
-            index[i0:i1] = self.index[i]
-
-        values = self.values[self.bounds[0]:self.bounds[-1]]
-        keys = self.keys[self.bounds[0]:self.bounds[-1]]
-
-        return index, keys, values
-
-    def resample(self, freq):
-        """
-        Resample this, bucketting into data points floored to integer multiples
-        of freq
-        :param freq:
-        :return:
-        """
-        floored = self.index // freq
-        indices = get_change_indices(floored)
-
-        cs = self.cumsum()
-
-        data, unique_keys = cs.to_dense()
-
-        old_row = np.zeros_like(unique_keys, dtype=np.int)
-
-        row_diffs = []
-        for i in indices[1:] - 1:
-            row = data[i]
-            row_diff = row - old_row
-            row_diffs.append(row_diff)
-            old_row = row
-
-        last_row = data[-1]
-        last_row_diff = last_row - old_row
-        row_diffs.append(last_row_diff)
-
-        diff_data = np.r_[row_diffs]
-        result = JaggedKeyValueArray.from_dense(diff_data, unique_keys, dtype=np.int)
-        result.index = floored[indices]
-        return result
 
     @staticmethod
     def load(filename):
