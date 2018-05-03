@@ -40,7 +40,6 @@ def get_empty_jagged_key_value_series():
 
 class LongerJaggedKeyValueSeriesTests(unittest.TestCase):
     def setUp(self):
-
         k0 = [10, 11]
         k1 = [11, 12, 13]
         k2 = [12, 13]
@@ -90,6 +89,19 @@ class JaggedKeyValueSeriesTests(unittest.TestCase):
         arr = JaggedKeyValueArray(keys, vals, bounds)
         index = [-5, -3, 0, 3, 5]
         self.s = JaggedKeyValueSeries(arr, index)
+
+    def test_resample(self):
+
+        result = self.s.resample(5)
+
+        expected = JaggedKeyValueSeries(
+            keys=[10, 11, 12, 13, 12, 13, 14],
+            values=[1, 5, 4, 5, 6, 7, 8],
+            bounds=[0, 4, 6, 7],
+            index=[-5, 0, 5],
+        )
+        print(result)
+        self.assertEqual(expected, result)
 
     def test_ravel(self):
 
@@ -197,13 +209,14 @@ class JaggedKeyValueSeriesTests(unittest.TestCase):
         result = self.s[:0].cumsum()
 
         expected = JaggedKeyValueSeries(
-            keys=[10, 11, 10, 11, 12, 13,],
+            keys=[10, 11, 10, 11, 12, 13, ],
             values=[1, 2, 1, 5, 4, 5],
             bounds=[0, 2, 6],
             index=[-5, -3],
         )
 
         self.assertEqual(expected, result)
+
 #
 #     def test_to_dense_slice_to_end(self):
 #         ''' Check that it works when the bounds start before/after the end'''

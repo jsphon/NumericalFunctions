@@ -19,37 +19,38 @@ DEFAULT_DTYPE = np.float32
 
 
 class JaggedKeyValueArray(object):
-    def __init__(self, keys, values, bounds, dtype=None, index=None, date_index=None):
+    def __init__(self, keys, values, bounds, keys_dtype=None, values_dtype=None):#, dtype=None, index=None, date_index=None):
 
-        dtype = dtype or DEFAULT_DTYPE
+        keys_dtype = keys_dtype or DEFAULT_DTYPE
+        values_dtype = values_dtype or DEFAULT_DTYPE
 
         if isinstance(keys, np.ndarray):
             self.keys = keys
         else:
-            self.keys = np.array(keys, dtype=dtype)
+            self.keys = np.array(keys, dtype=keys_dtype)
 
         if isinstance(values, np.ndarray):
             self.values = values
         else:
-            self.values = np.array(values, dtype=dtype)
+            self.values = np.array(values, dtype=values_dtype)
 
         if isinstance(bounds, np.ndarray):
             self.bounds = bounds
         else:
             self.bounds = np.array(bounds, dtype=np.int)
 
-        if index is not None:
-            if isinstance(index, (list, tuple)):
-                self.index = np.array(index)
-            else:
-                self.index = index
-        else:
-            self.index = np.arange(len(self.bounds) - 1)
-
-        self.date_index = date_index
+        # if index is not None:
+        #     if isinstance(index, (list, tuple)):
+        #         self.index = np.array(index)
+        #     else:
+        #         self.index = index
+        # else:
+        #     self.index = np.arange(len(self.bounds) - 1)
+        #
+        # self.date_index = date_index
 
     @staticmethod
-    def from_lists(key_list, val_list, dtype=None):
+    def from_lists(key_list, val_list, keys_dtype=None, values_dtype=None):#, dtype=None):
         """ Make a JaggedKeyValueArray from key and value list of lists
         """
         assert len(key_list) == len(val_list)
@@ -63,7 +64,13 @@ class JaggedKeyValueArray(object):
 
         key_list = [x for item in key_list for x in item]
         val_list = [x for item in val_list for x in item]
-        return JaggedKeyValueArray(key_list, val_list, bounds, dtype=dtype)
+        return JaggedKeyValueArray(
+            key_list,
+            val_list,
+            bounds,
+            keys_dtype=keys_dtype,
+            values_dtype=values_dtype
+        )
 
     @staticmethod
     def from_dense_nb(data, cols):  # , dtype=np.int ):
@@ -73,7 +80,7 @@ class JaggedKeyValueArray(object):
         return JaggedKeyValueArray(keys[:n], values[:n], bounds)
 
     @staticmethod
-    def from_dense(data, cols, dtype=np.int):
+    def from_dense(data, cols, keys_dtype=None, values_dtype=None):
         """ Make a JaggedKeyValueArray from a dense array """
 
         keys = []
@@ -89,7 +96,12 @@ class JaggedKeyValueArray(object):
             values.append(row_vals)
             bounds.append(len(row_cols))
 
-        return JaggedKeyValueArray.from_lists(keys, values)
+        return JaggedKeyValueArray.from_lists(
+            keys,
+            values,
+            keys_dtype=keys_dtype,
+            values_dtype=values_dtype
+        )
 
     def get_histogram(self):
         result = defaultdict(int)

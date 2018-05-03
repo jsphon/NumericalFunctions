@@ -264,7 +264,7 @@ class JaggedKeyValueSeries(object):
         floored = self.index // freq
         indices = get_change_indices(floored)
 
-        cs = self.cumsum()
+        cs = self.arr.cumsum()
 
         data, unique_keys = cs.to_dense()
 
@@ -282,9 +282,9 @@ class JaggedKeyValueSeries(object):
         row_diffs.append(last_row_diff)
 
         diff_data = np.r_[row_diffs]
-        result = JaggedKeyValueArray.from_dense(diff_data, unique_keys, dtype=np.int)
-        result.index = floored[indices]
-        return result
+
+        arr = JaggedKeyValueArray.from_dense(diff_data, unique_keys)
+        return JaggedKeyValueSeries(arr, index=self.index[indices])
 
     @staticmethod
     def load(filename):
