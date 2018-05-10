@@ -31,13 +31,13 @@ class JaggedKeyValueSeries(object):
 
     def __init__(self, arr=None, index=None, keys=None, values=None, bounds=None):
 
-        if index is None:
-            index = np.arange(len(arr) - 1)
-        elif isinstance(index, (list, tuple)):
-            index = np.array(index)
-
         if arr is None:
             arr = JaggedKeyValueArray(keys=keys, values=values, bounds=bounds)
+
+        if index is None:
+            index = np.arange(len(arr))
+        elif isinstance(index, (list, tuple)):
+            index = np.array(index)
 
         self._verify(arr, index)
         self.arr = arr
