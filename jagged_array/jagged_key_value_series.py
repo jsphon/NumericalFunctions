@@ -1,9 +1,3 @@
-'''
-Created on 1 Aug 2015
-
-@author: jon
-'''
-
 import datetime
 from collections import defaultdict
 
@@ -12,12 +6,6 @@ import pandas as pd
 import numpy as np
 
 from jagged_array.jagged_key_value_array import JaggedKeyValueArray, INT_TYPES
-
-
-# from numerical_functions import numba_funcs as nf
-
-# INT_TYPES = (int, np.int, np.int64)
-# DEFAULT_DTYPE = np.float32
 
 
 class JaggedKeyValueSeries(object):
