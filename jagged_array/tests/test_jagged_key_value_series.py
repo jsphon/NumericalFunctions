@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import pandas.util.testing as tm
 import tempfile
 import unittest
 
@@ -89,6 +90,22 @@ class JaggedKeyValueSeriesTests(unittest.TestCase):
         arr = JaggedKeyValueArray(keys, vals, bounds)
         index = [-5, -3, 0, 3, 5]
         self.s = JaggedKeyValueSeries(arr, index)
+
+    def test_get_ohlvc_frame(self):
+
+        df = self.s.get_ohlcv_frame(1)
+
+        expected = pd.DataFrame([
+            [10, 11, 10, 10, 3],
+            [12, 13, 11, 12, 12],
+            [12, 13, 12, 12, 13],
+            [np.nan, np.nan, np.nan, np.nan, 0],
+            [14, 14, 14, 14, 8]
+        ],
+            columns=['o', 'h', 'l', 'c', 'v'],
+            index=[-5, -3, 0, 3, 5])
+
+        tm.assert_frame_equal(expected, df, check_dtype=False)
 
     def test_load_save(self):
 

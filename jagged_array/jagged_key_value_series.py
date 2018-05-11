@@ -33,7 +33,7 @@ class JaggedKeyValueSeries(object):
 
     def _verify(self, arr, index):
         assert isinstance(arr, JaggedKeyValueArray)
-        assert len(arr) == len(index), '%s!=%s'%(len(arr), len(index))
+        assert len(arr) == len(index), '%s!=%s' % (len(arr), len(index))
         assert is_sorted(index)
 
     def __bool__(self):
@@ -96,10 +96,17 @@ class JaggedKeyValueSeries(object):
         new_array = self.arr.cumsum()
         return JaggedKeyValueSeries(new_array, self.index)
 
-    def get_ohlcv_frame_by_interval(self, freq):
-        resampled_index = get_resample_indices(self.index, freq)
-        ohlc = self.get_ohlc_by_interval(freq)
-        v = self.get_v_by_index(freq)
+    def get_ohlcv_frame(self, interval):
+        """
+        Resample the data and return as a DataFrame
+        :param interval:
+        :return:
+        """
+        resampled_bounds = self.get_resample_index_bounds(interval)
+        ohlc = self._get_ohlc(resampled_bounds)
+        v = self._get_v(resampled_bounds)
+        resampled_index = self.index[get_resample_indices(self.index, interval)]
+
         df = pd.DataFrame(
             ohlc,
             index=resampled_index,
@@ -107,18 +114,6 @@ class JaggedKeyValueSeries(object):
         )
         df['v'] = v
         return df
-
-    # def get_ohlcv_frame_by_date_index(self, freq):
-    #     resampled_index = get_resampled_datetime_index(self.date_index, freq)
-    #     ohlc = self.get_ohlc_by_date_index(freq)
-    #     v = self.get_v_by_date_index(freq)
-    #     df = pd.DataFrame(
-    #         ohlc,
-    #         index=resampled_index,
-    #         columns=['o', 'h', 'l', 'c']
-    #     )
-    #     df['v'] = v
-    #     return df
 
     def get_v(self, interval):
         """
@@ -279,10 +274,10 @@ class JaggedKeyValueSeries(object):
 
         with np.load(filename) as data:
             return JaggedKeyValueSeries(
-                keys = data['keys'],
-                values = data['values'],
-                bounds = data['bounds'],
-                index = data['index'],
+                keys=data['keys'],
+                values=data['values'],
+                bounds=data['bounds'],
+                index=data['index'],
             )
 
     def save(self, filename):
@@ -293,10 +288,10 @@ class JaggedKeyValueSeries(object):
 
         np.savez_compressed(
             filename,
-            keys = self.arr.keys,
-            values = self.arr.values,
-            bounds = self.arr.bounds,
-            index = self.index
+            keys=self.arr.keys,
+            values=self.arr.values,
+            bounds=self.arr.bounds,
+            index=self.index
         )
 
 
