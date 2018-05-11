@@ -5,6 +5,7 @@ import numba as nb
 import pandas as pd
 import numpy as np
 
+from jagged_array.lib import is_sorted
 from jagged_array.jagged_key_value_array import JaggedKeyValueArray, INT_TYPES
 
 
@@ -360,11 +361,3 @@ def get_change_indices(x):
     i1 = np.where(np.diff(x))[0] + 1
     i0 = np.array([0])
     return np.r_[i0, i1]
-
-
-@nb.jit(nopython=True)
-def is_sorted(a):
-    for i in range(a.size - 1):
-        if a[i + 1] < a[i]:
-            return False
-    return True
