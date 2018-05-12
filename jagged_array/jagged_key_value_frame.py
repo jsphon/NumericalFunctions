@@ -34,7 +34,7 @@ class JaggedKeyValueFrame(object):
 
     def _verify(self):
         for k, arr in self.arrs.items():
-            assert isinstance(arr, JaggedKeyValueArray)
+            assert isinstance(arr, JaggedKeyValueArray), 'arr is a %s' % type(arr)
             assert len(arr) == len(self.index), '%s!=%s'%(len(arr), len(self.index))
         assert is_sorted(self.index), 'index should be sorted'
 
