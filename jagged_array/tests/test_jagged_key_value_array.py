@@ -32,7 +32,6 @@ class MoreJaggedKeyValueArrayTests(unittest.TestCase):
 
         result = str(arr)
         print(result)
-        self.assertIsInstance(str(result))
 
     def test_to_dense_slice_from_beginning(self):
         ''' Check that it works when the bounds start before/after the end'''

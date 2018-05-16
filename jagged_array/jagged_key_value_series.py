@@ -106,7 +106,9 @@ class JaggedKeyValueSeries(object):
         resampled_bounds = self.get_resample_index_bounds(interval)
         ohlc = self._get_ohlc(resampled_bounds)
         v = self._get_v(resampled_bounds)
-        resampled_index = self.index[get_resample_indices(self.index, interval)]
+
+        floored_index = floor_to_nearest_int(self.index, interval)
+        resampled_index = floored_index[get_resample_indices(self.index, interval)]
 
         df = pd.DataFrame(
             ohlc,
