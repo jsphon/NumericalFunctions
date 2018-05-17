@@ -23,7 +23,12 @@ class JaggedKeyValueFrameTests(unittest.TestCase):
                 keys=[4, 5, 6],
                 values=[3, 2, 1],
                 bounds=[0, 1, 2, 3],
-            )
+            ),
+            789: JaggedKeyValueArray(
+                keys=[],
+                values=[],
+                bounds=[0, 0, 0, 0],
+            ),
         }
 
         index = [10, 11, 12]
@@ -45,6 +50,12 @@ class JaggedKeyValueFrameTests(unittest.TestCase):
                 values=[2, 1],
                 bounds=[0, 1, 2],
             )
+            ,
+            789: JaggedKeyValueArray(
+                keys=[],
+                values=[],
+                bounds=[0, 0, 0],
+            )
         }
         expected_index = [10, 11]
         expected = JaggedKeyValueFrame(expected_data, expected_index)
@@ -65,9 +76,9 @@ class JaggedKeyValueFrameTests(unittest.TestCase):
 
         expected = pd.DataFrame(
             [
-            [2, 2, 2, 2, 1, 4, 4, 4, 4, 3],
-            [3, 3, 3, 3, 2, 5, 5, 5, 5, 2],
-            [4, 4, 4, 4, 3, 6, 6, 6, 6, 1],
+            [2, 2, 2, 2, 1, 4, 4, 4, 4, 3, np.nan, np.nan, np.nan, np.nan, 0],
+            [3, 3, 3, 3, 2, 5, 5, 5, 5, 2, np.nan, np.nan, np.nan, np.nan, 0],
+            [4, 4, 4, 4, 3, 6, 6, 6, 6, 1, np.nan, np.nan, np.nan, np.nan, 0],
             ],
             index = [10, 11, 12],
         )
@@ -83,9 +94,15 @@ class JaggedKeyValueFrameTests(unittest.TestCase):
             (567, 'l'),
             (567, 'c'),
             (567, 'v'),
+            (789, 'o'),
+            (789, 'h'),
+            (789, 'l'),
+            (789, 'c'),
+            (789, 'v'),
             )
         )
         expected.columns = columns
 
         df = self.jf.get_ohlcv_frame(1)
+
         tm.assert_frame_equal(expected, df, check_dtype=False)
