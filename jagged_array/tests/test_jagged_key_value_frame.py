@@ -30,6 +30,27 @@ class JaggedKeyValueFrameTests(unittest.TestCase):
 
         self.jf = JaggedKeyValueFrame(data, index)
 
+    def test_row_slice(self):
+        result = self.jf.row_slice(11, 12)
+
+        expected_data = {
+            123: JaggedKeyValueArray(
+                keys=[3, 4],
+                values=[2, 3],
+                bounds=[0, 1, 2],
+            )
+            ,
+            567: JaggedKeyValueArray(
+                keys=[5, 6],
+                values=[2, 1],
+                bounds=[0, 1, 2],
+            )
+        }
+        expected_index = [10, 11]
+        expected = JaggedKeyValueFrame(expected_data, expected_index)
+
+        self.assertTrue(expected==result)
+
     def test___getitem__single(self):
 
         result = self.jf[123]
@@ -66,7 +87,5 @@ class JaggedKeyValueFrameTests(unittest.TestCase):
         )
         expected.columns = columns
 
-        print(expected)
         df = self.jf.get_ohlcv_frame(1)
-        print(df)
         tm.assert_frame_equal(expected, df, check_dtype=False)

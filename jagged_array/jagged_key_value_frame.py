@@ -11,7 +11,6 @@ COLUMN_TYPES = (int, np.int, np.int64, str)
 
 
 class JaggedKeyValueFrame(object):
-
     def __init__(self, arrs=None, index=None):
         """
 
@@ -20,7 +19,7 @@ class JaggedKeyValueFrame(object):
         :param columns: labels for each array
         """
 
-        self.arrs =arrs
+        self.arrs = arrs
         self.index = index
 
         if index is None:
@@ -32,10 +31,19 @@ class JaggedKeyValueFrame(object):
 
         self._verify()
 
+    def __eq__(self, other):
+        if self.arrs.keys() != other.arrs.keys():
+            return False
+        for k, arr in self.arrs.items():
+            assert arr == other.arrs[k], 'series %s are different' % k
+
+        return True
+        # for arr in self.arrs
+
     def _verify(self):
         for k, arr in self.arrs.items():
             assert isinstance(arr, JaggedKeyValueArray), 'arr is a %s' % type(arr)
-            assert len(arr) == len(self.index), '%s!=%s'%(len(arr), len(self.index))
+            assert len(arr) == len(self.index), '%s!=%s' % (len(arr), len(self.index))
         assert is_sorted(self.index), 'index should be sorted'
 
     def __getitem__(self, i):
@@ -47,9 +55,15 @@ class JaggedKeyValueFrame(object):
             arrs = dict((k, self.arrs[k]) for k in i)
             return JaggedKeyValueFrame(arrs, index=self.index)
 
+    def row_slice(self, istart, iend):
+        i0 = np.searchsorted(self.index, istart)
+        i1 = np.searchsorted(self.index, iend, side='right')
+        arrs = OrderedDict()
+        for k, arr in self.arrs.items():
+            arrs[k] = arr[i0:i1]
+        new_index = self.index[i0:i1]
+        return JaggedKeyValueFrame(arrs, new_index)
+
     def get_ohlcv_frame(self, freq):
         dfs = OrderedDict((k, self[k].get_ohlcv_frame(freq)) for k in self.arrs)
         return pd.concat(dfs, axis=1)
-
-
-
