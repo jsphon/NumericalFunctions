@@ -67,3 +67,7 @@ class JaggedKeyValueFrame(object):
     def get_ohlcv_frame(self, freq):
         dfs = OrderedDict((k, self[k].get_ohlcv_frame(freq)) for k in self.arrs)
         return pd.concat(dfs, axis=1)
+
+    def get_fixed_depth_frame(self, depth, reverse):
+        dfs = OrderedDict((k, self[k].to_fixed_depth(depth, reverse)) for k in self.arrs)
+        return pd.concat(dfs, axis=1)

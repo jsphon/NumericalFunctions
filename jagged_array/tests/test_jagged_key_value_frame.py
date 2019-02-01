@@ -1,12 +1,14 @@
 import numpy as np
 import pandas as pd
 import pandas.util.testing as tm
-import tempfile
 import unittest
 
 from jagged_array.jagged_key_value_array import JaggedKeyValueArray
 from jagged_array.jagged_key_value_series import JaggedKeyValueSeries
 from jagged_array.jagged_key_value_frame import JaggedKeyValueFrame
+
+
+NAN = np.nan
 
 
 class JaggedKeyValueFrameTests(unittest.TestCase):
@@ -34,6 +36,36 @@ class JaggedKeyValueFrameTests(unittest.TestCase):
         index = [10, 11, 12]
 
         self.jf = JaggedKeyValueFrame(data, index)
+
+    def test_get_fixed_depth_frame(self):
+
+        result = self.jf.get_fixed_depth_frame(depth=2, reverse=False)
+
+        data = [
+            [2, NAN, 1, NAN, 4, NAN, 3, NAN, NAN, NAN, NAN, NAN],
+            [3, NAN, 2, NAN, 5, NAN, 2, NAN, NAN, NAN, NAN, NAN],
+            [4, NAN, 3, NAN, 6, NAN, 1, NAN, NAN, NAN, NAN, NAN],
+
+        ]
+
+        columns = pd.MultiIndex.from_tuples([
+            (123, 'key', 0),
+            (123, 'key', 1),
+            (123, 'value', 0),
+            (123, 'value', 1),
+            (567, 'key', 0),
+            (567, 'key', 1),
+            (567, 'value', 0),
+            (567, 'value', 1),
+            (789, 'key', 0),
+            (789, 'key', 1),
+            (789, 'value', 0),
+            (789, 'value', 1),
+        ], names=[None, 'type', 'level'])
+
+        expected = pd.DataFrame(data, columns=columns, index=self.jf.index)
+
+        pd.testing.assert_frame_equal(expected, result, check_dtype=False)
 
     def test_row_slice(self):
         result = self.jf.row_slice(11, 12)
@@ -106,3 +138,7 @@ class JaggedKeyValueFrameTests(unittest.TestCase):
         df = self.jf.get_ohlcv_frame(1)
 
         tm.assert_frame_equal(expected, df, check_dtype=False)
+
+
+if __name__ == '__main__':
+    unittest.main()
