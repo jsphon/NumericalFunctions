@@ -112,6 +112,16 @@ class JaggedKeyValueArrayTests(unittest.TestCase):
 
         self.arr = JaggedKeyValueArray(self.keys, self.vals, self.bounds)
 
+    def test_to_fixed_depth(self):
+
+        keys, values = self.arr.to_fixed_depth(1, reverse=True)
+
+        expected_keys = np.array([[11], [13], [13]])
+        expected_values = np.array([[1], [3], [6]])
+
+        np.testing.assert_array_equal(expected_keys, keys)
+        np.testing.assert_array_equal(expected_values, values)
+
     def test_remove_values_smaller_than1(self):
         result = self.arr.remove_values_smaller_than(1.1)
 

@@ -42,6 +42,29 @@ class JaggedKeyValueArray(object):
         else:
             self.bounds = np.array(bounds, dtype=np.int)
 
+    def to_fixed_depth(self, depth, reverse):
+
+        length = len(self)
+        keys = np.empty((length, depth), self.keys.dtype)
+        values = np.empty((length, depth), self.values.dtype)
+
+        keys[:] = np.nan
+        if self.values.dtype in (np.int32, np.int64):
+            values[:] = 0
+        else:
+            values[:] = np.nan
+
+        for i in range(length):
+            i0 = self.bounds[i]
+            i1 = self.bounds[i+1]
+            row_size = i1-i0
+            if reverse:
+                for j in range(min(row_size, depth)):
+                    keys[i, j] = self.keys[i1-j-1]
+                    values[i, j] = self.values[i1 - j - 1]
+
+        return keys, values
+
     def remove_values_smaller_than(self, value):
 
         new_keys, new_values, new_bounds = remove_values_smaller_than(
