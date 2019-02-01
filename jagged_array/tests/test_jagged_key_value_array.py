@@ -1,14 +1,13 @@
-import numpy as np
 import tempfile
 import unittest
+
+import numpy as np
 
 from jagged_array.jagged_key_value_array import JaggedKeyValueArray
 
 
 class MoreJaggedKeyValueArrayTests(unittest.TestCase):
-
     def test___repr__(self):
-
         k0 = [10, 11]
         k1 = [11, 12, 13]
         k2 = [12, 13]
@@ -112,6 +111,32 @@ class JaggedKeyValueArrayTests(unittest.TestCase):
         self.bounds = [0, 1, 3, 6]
 
         self.arr = JaggedKeyValueArray(self.keys, self.vals, self.bounds)
+
+    def test_remove_values_smaller_than1(self):
+        result = self.arr.remove_values_smaller_than(1.1)
+
+        expected_keys = np.array([12, 13, 11, 12, 13])
+        expected_values = np.array([2, 3, 4, 5, 6])
+
+        expected_bounds = [0, 0, 2, 5]
+
+        self.assertIsInstance(result, JaggedKeyValueArray)
+        np.testing.assert_array_equal(expected_keys, result.keys)
+        np.testing.assert_array_equal(expected_values, result.values)
+        np.testing.assert_array_equal(expected_bounds, result.bounds)
+
+    def test_remove_values_smaller_than2(self):
+        result = self.arr.remove_values_smaller_than(3.1)
+
+        expected_keys = np.array([11, 12, 13])
+        expected_values = np.array([4, 5, 6])
+
+        expected_bounds = [0, 0, 0, 3]
+
+        self.assertIsInstance(result, JaggedKeyValueArray)
+        np.testing.assert_array_equal(expected_keys, result.keys)
+        np.testing.assert_array_equal(expected_values, result.values)
+        np.testing.assert_array_equal(expected_bounds, result.bounds)
 
     def test_io(self):
         file = tempfile.TemporaryFile()
@@ -359,3 +384,5 @@ class JaggedKeyValueArrayTests(unittest.TestCase):
 
 
 
+if __name__ == '__main__':
+    unittest.main()

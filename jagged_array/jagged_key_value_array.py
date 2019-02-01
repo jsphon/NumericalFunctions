@@ -8,8 +8,8 @@ import datetime
 from collections import defaultdict
 
 import numba as nb
-import pandas as pd
 import numpy as np
+import pandas as pd
 
 from jagged_array.jagged_array import JaggedArray
 from numerical_functions import numba_funcs as nf
@@ -17,9 +17,12 @@ from numerical_functions import numba_funcs as nf
 INT_TYPES = (int, np.int, np.int64)
 DEFAULT_DTYPE = np.float32
 
+EPS = 1e-6
+
 
 class JaggedKeyValueArray(object):
-    def __init__(self, keys, values, bounds, keys_dtype=None, values_dtype=None):#, dtype=None, index=None, date_index=None):
+    def __init__(self, keys, values, bounds, keys_dtype=None,
+                 values_dtype=None):  # , dtype=None, index=None, date_index=None):
 
         keys_dtype = keys_dtype or DEFAULT_DTYPE
         values_dtype = values_dtype or DEFAULT_DTYPE
@@ -39,8 +42,31 @@ class JaggedKeyValueArray(object):
         else:
             self.bounds = np.array(bounds, dtype=np.int)
 
+    def remove_values_smaller_than(self, value):
+
+        new_keys = np.ndarray(len(self.keys), dtype=self.keys.dtype)
+        new_values = np.ndarray(len(self.values), dtype=self.values.dtype)
+        new_bounds = self.bounds.copy()
+
+        c = 0
+        for i in range(len(self.keys)):
+            if np.abs(self.values[i]) >= value:
+                new_keys[c] = self.keys[i]
+                new_values[c] = self.values[i]
+                c += 1
+            else:
+                self._reduce_bounds_above(new_bounds, c)
+
+        return JaggedKeyValueArray(new_keys[:c], new_values[:c], new_bounds)
+
+    def _reduce_bounds_above(self, bounds, value):
+        for i in range(len(bounds)):
+            if bounds[i] > value:
+                bounds[i] -= 1
+        print('bounds are', bounds)
+
     @staticmethod
-    def from_lists(key_list, val_list, keys_dtype=None, values_dtype=None):#, dtype=None):
+    def from_lists(key_list, val_list, keys_dtype=None, values_dtype=None):  # , dtype=None):
         """ Make a JaggedKeyValueArray from key and value list of lists
         """
         assert len(key_list) == len(val_list)
@@ -138,8 +164,8 @@ class JaggedKeyValueArray(object):
             return self.keys[i0:i1], self.values[i0:i1]
 
         if isinstance(i, slice):
-            if i.start and i.start<0:
-                s = slice(i.start-1, i.stop if i.stop else None, i.step)
+            if i.start and i.start < 0:
+                s = slice(i.start - 1, i.stop if i.stop else None, i.step)
             else:
                 s = slice(i.start, i.stop + 1 if i.stop else None, i.step)
             return JaggedKeyValueArray(self.keys, self.values, self.bounds[s])
@@ -276,7 +302,6 @@ class JaggedKeyValueArray(object):
     def load(filename):
 
         with np.load(filename) as data:
-
             return JaggedKeyValueArray(
                 keys=data['keys'],
                 values=data['values'],
@@ -291,9 +316,9 @@ class JaggedKeyValueArray(object):
 
         np.savez_compressed(
             filename,
-            keys = self.keys,
-            values = self.values,
-            bounds = self.bounds,
+            keys=self.keys,
+            values=self.values,
+            bounds=self.bounds,
         )
 
 
