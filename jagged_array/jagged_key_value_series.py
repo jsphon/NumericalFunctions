@@ -107,8 +107,6 @@ class JaggedKeyValueSeries(object):
         result = pd.DataFrame(np.c_[keys, values], columns=cindex, index=self.index)
         return result
 
-
-
     def cumsum(self):
         new_array = self.arr.cumsum()
         return JaggedKeyValueSeries(new_array, self.index)

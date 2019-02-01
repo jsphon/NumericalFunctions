@@ -64,6 +64,10 @@ class JaggedKeyValueFrame(object):
         new_index = self.index[i0:i1]
         return JaggedKeyValueFrame(arrs, new_index)
 
+    def cumsum(self):
+        arrs = OrderedDict((k, self[k].cumsum().arr) for k in self.arrs)
+        return JaggedKeyValueFrame(arrs, self.index)
+
     def get_ohlcv_frame(self, freq):
         dfs = OrderedDict((k, self[k].get_ohlcv_frame(freq)) for k in self.arrs)
         return pd.concat(dfs, axis=1)

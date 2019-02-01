@@ -37,6 +37,33 @@ class JaggedKeyValueFrameTests(unittest.TestCase):
 
         self.jf = JaggedKeyValueFrame(data, index)
 
+    def test_cumsum(self):
+
+        expected_data = {
+            123: JaggedKeyValueArray(
+                keys=[2, 2, 3, 2, 3, 4],
+                values=[1, 1, 2, 1, 2, 3],
+                bounds=[0, 1, 3, 6],
+            )
+            ,
+            567: JaggedKeyValueArray(
+                keys=[4, 4, 5, 4, 5, 6],
+                values=[3, 3, 2,3, 2, 1],
+                bounds=[0, 1, 3, 6],
+            ),
+            789: JaggedKeyValueArray(
+                keys=[],
+                values=[],
+                bounds=[0, 0, 0, 0],
+            ),
+        }
+
+        expected = JaggedKeyValueFrame(expected_data, index=[10, 11, 12])
+
+        result = self.jf.cumsum()
+
+        self.assertEqual(expected, result)
+
     def test_get_fixed_depth_frame(self):
 
         result = self.jf.get_fixed_depth_frame(depth=2, reverse=False)
