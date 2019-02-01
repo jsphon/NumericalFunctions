@@ -44,26 +44,11 @@ class JaggedKeyValueArray(object):
 
     def remove_values_smaller_than(self, value):
 
-        new_keys = np.ndarray(len(self.keys), dtype=self.keys.dtype)
-        new_values = np.ndarray(len(self.values), dtype=self.values.dtype)
-        new_bounds = self.bounds.copy()
+        new_keys, new_values, new_bounds = remove_values_smaller_than(
+            self.keys, self.values, self.bounds, value
+        )
 
-        c = 0
-        for i in range(len(self.keys)):
-            if np.abs(self.values[i]) >= value:
-                new_keys[c] = self.keys[i]
-                new_values[c] = self.values[i]
-                c += 1
-            else:
-                self._reduce_bounds_above(new_bounds, c)
-
-        return JaggedKeyValueArray(new_keys[:c], new_values[:c], new_bounds)
-
-    def _reduce_bounds_above(self, bounds, value):
-        for i in range(len(bounds)):
-            if bounds[i] > value:
-                bounds[i] -= 1
-        print('bounds are', bounds)
+        return JaggedKeyValueArray(new_keys, new_values, new_bounds)
 
     @staticmethod
     def from_lists(key_list, val_list, keys_dtype=None, values_dtype=None):  # , dtype=None):
@@ -381,6 +366,31 @@ def get_change_indices(x):
 
 def is_date_type(x):
     return isinstance(x, (datetime.datetime, pd.Timestamp))
+
+
+@nb.jit(nopython=True)
+def remove_values_smaller_than(keys, values, bounds, value):
+    new_keys = np.empty_like(keys)
+    new_values = np.empty_like(values)
+    new_bounds = bounds.copy()
+
+    c = 0
+    for i in range(len(keys)):
+        if np.abs(values[i]) >= value:
+            new_keys[c] = keys[i]
+            new_values[c] = values[i]
+            c += 1
+        else:
+            _reduce_bounds_above(new_bounds, c)
+
+    return new_keys[:c], new_values[:c], new_bounds
+
+
+@nb.jit(nopython=True)
+def _reduce_bounds_above(bounds, value):
+    for i in range(len(bounds)):
+        if bounds[i] > value:
+            bounds[i] -= 1
 
 
 @nb.jit(nopython=True)
