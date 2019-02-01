@@ -171,6 +171,22 @@ class JaggedKeyValueArrayTests(unittest.TestCase):
         np.testing.assert_array_equal(expected_values, result.values)
         np.testing.assert_array_equal(expected_bounds, result.bounds)
 
+    def test_remove_values_smaller_than3(self):
+        arr = JaggedKeyValueArray(
+            keys=[2, 3, 4],
+            values=[1, 2, 3],
+            bounds=[0, 1, 2, 3],
+        )
+        result = arr.remove_values_smaller_than(1.1)
+        print(result)
+        expected = JaggedKeyValueArray(
+            keys=[3, 4],
+            values=[2, 3],
+            bounds=[0, 0, 1, 2],
+        )
+
+        self.assertEqual(expected, result)
+
     def test_io(self):
         file = tempfile.TemporaryFile()
 

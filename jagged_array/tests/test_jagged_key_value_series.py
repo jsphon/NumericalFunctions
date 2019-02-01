@@ -123,7 +123,7 @@ class JaggedKeyValueSeriesTests(unittest.TestCase):
             index = self.s.index
         )
 
-        result = self.s.to_fixed_depth(3, reverse=True)
+        result = self.s.get_fixed_depth_frame(3, reverse=True)
 
         pd.testing.assert_frame_equal(expected, result, check_dtype=False)
 
@@ -159,7 +159,7 @@ class JaggedKeyValueSeriesTests(unittest.TestCase):
             index = self.s.index
         )
 
-        result = self.s.to_fixed_depth(3, reverse=False)
+        result = self.s.get_fixed_depth_frame(3, reverse=False)
 
         pd.testing.assert_frame_equal(expected, result, check_dtype=False)
 

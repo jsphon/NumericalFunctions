@@ -64,6 +64,10 @@ class JaggedKeyValueFrame(object):
         new_index = self.index[i0:i1]
         return JaggedKeyValueFrame(arrs, new_index)
 
+    def remove_values_smaller_than(self, value):
+        arrs = OrderedDict((k, self[k].arr.remove_values_smaller_than(value)) for k in self.arrs)
+        return JaggedKeyValueFrame(arrs, self.index)
+
     def cumsum(self):
         arrs = OrderedDict((k, self[k].cumsum().arr) for k in self.arrs)
         return JaggedKeyValueFrame(arrs, self.index)
@@ -73,5 +77,5 @@ class JaggedKeyValueFrame(object):
         return pd.concat(dfs, axis=1)
 
     def get_fixed_depth_frame(self, depth, reverse):
-        dfs = OrderedDict((k, self[k].to_fixed_depth(depth, reverse)) for k in self.arrs)
+        dfs = OrderedDict((k, self[k].get_fixed_depth_frame(depth, reverse)) for k in self.arrs)
         return pd.concat(dfs, axis=1)

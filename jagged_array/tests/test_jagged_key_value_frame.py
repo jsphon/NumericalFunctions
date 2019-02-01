@@ -37,6 +37,37 @@ class JaggedKeyValueFrameTests(unittest.TestCase):
 
         self.jf = JaggedKeyValueFrame(data, index)
 
+    def test_remove_values_smaller_than(self):
+
+        expected_data = {
+            123: JaggedKeyValueArray(
+                keys=[3, 4],
+                values=[2, 3],
+                bounds=[0, 0, 1, 2],
+            )
+            ,
+            567: JaggedKeyValueArray(
+                keys=[4, 5],
+                values=[3, 2],
+                bounds=[0, 1, 2, 2],
+            ),
+            789: JaggedKeyValueArray(
+                keys=[],
+                values=[],
+                bounds=[0, 0, 0, 0],
+            ),
+        }
+
+        expected = JaggedKeyValueFrame(expected_data, [10, 11, 12])
+
+        result = self.jf.remove_values_smaller_than(1.1)
+        #print(expected[123])
+        print(type(result[123]))
+        print(result[123].arr.keys)
+        print(result[123].arr.values)
+        print(result[123].arr.bounds)
+        self.assertEqual(expected, result)
+
     def test_cumsum(self):
 
         expected_data = {

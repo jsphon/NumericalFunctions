@@ -91,7 +91,7 @@ class JaggedKeyValueSeries(object):
         rows = ['\t%s, %s, %s' % (idx, k, v) for (idx, (k, v)) in irows]
         return '\n'.join(rows)
 
-    def to_fixed_depth(self, depth, reverse):
+    def get_fixed_depth_frame(self, depth, reverse):
         """
         Convert to a dataframe with fixed depth
         :param depth:
