@@ -62,6 +62,10 @@ class JaggedKeyValueArray(object):
                 for j in range(min(row_size, depth)):
                     keys[i, j] = self.keys[i1-j-1]
                     values[i, j] = self.values[i1 - j - 1]
+            else:
+                for j in range(min(row_size, depth)):
+                    keys[i, j] = self.keys[i0 + j]
+                    values[i, j] = self.values[i0 + j]
 
         return keys, values
 

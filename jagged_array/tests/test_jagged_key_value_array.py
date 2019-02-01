@@ -6,6 +6,9 @@ import numpy as np
 from jagged_array.jagged_key_value_array import JaggedKeyValueArray
 
 
+NAN = np.nan
+
+
 class MoreJaggedKeyValueArrayTests(unittest.TestCase):
     def test___repr__(self):
         k0 = [10, 11]
@@ -118,6 +121,26 @@ class JaggedKeyValueArrayTests(unittest.TestCase):
 
         expected_keys = np.array([[11], [13], [13]])
         expected_values = np.array([[1], [3], [6]])
+
+        np.testing.assert_array_equal(expected_keys, keys)
+        np.testing.assert_array_equal(expected_values, values)
+
+    def test_to_fixed_depth2(self):
+
+        keys, values = self.arr.to_fixed_depth(2, reverse=True)
+
+        expected_keys = np.array([[11, NAN], [13, 12], [13, 12]])
+        expected_values = np.array([[1, NAN], [3, 2], [6, 5]])
+
+        np.testing.assert_array_equal(expected_keys, keys)
+        np.testing.assert_array_equal(expected_values, values)
+
+    def test_to_fixed_depth_reverse_False(self):
+
+        keys, values = self.arr.to_fixed_depth(2, reverse=False)
+
+        expected_keys = np.array([[11, NAN], [12, 13], [11, 12]])
+        expected_values = np.array([[1, NAN], [2, 3], [4, 5]])
 
         np.testing.assert_array_equal(expected_keys, keys)
         np.testing.assert_array_equal(expected_values, values)
