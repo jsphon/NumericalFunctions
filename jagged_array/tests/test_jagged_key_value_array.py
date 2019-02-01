@@ -224,6 +224,16 @@ class JaggedKeyValueArrayTests(unittest.TestCase):
         np.testing.assert_array_equal(e.keys, r.keys)
         np.testing.assert_array_equal(e.values, r.values)
 
+    def test_cumsum2(self):
+        jkva = JaggedKeyValueArray(
+            keys=[],
+            values=[],
+            bounds=[0, 0, 0, 0],
+        )
+
+        result = jkva.cumsum()
+        print(result)
+
     def test_from_lists(self):
         key_list = [self.k0, self.k1, self.k2]
         val_list = [self.v0, self.v1, self.v2]
