@@ -1,5 +1,3 @@
-import datetime
-from collections import defaultdict
 
 import numba as nb
 import pandas as pd
@@ -92,6 +90,24 @@ class JaggedKeyValueSeries(object):
         irows = zip(index, arr)
         rows = ['\t%s, %s, %s' % (idx, k, v) for (idx, (k, v)) in irows]
         return '\n'.join(rows)
+
+    def to_fixed_depth(self, depth, reverse):
+        """
+        Convert to a dataframe with fixed depth
+        :param depth:
+        :param reverse:
+        :return:
+        """
+
+        keys, values = self.arr.to_fixed_depth(depth, reverse)
+        key_columns = [('key', i) for i in range(depth)]
+        value_columns = [('value', i) for i in range(depth)]
+        columns = key_columns + value_columns
+        cindex = pd.MultiIndex.from_tuples(columns, names=['type', 'level'])
+        result = pd.DataFrame(np.c_[keys, values], columns=cindex, index=self.index)
+        return result
+
+
 
     def cumsum(self):
         new_array = self.arr.cumsum()
