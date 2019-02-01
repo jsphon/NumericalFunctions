@@ -91,13 +91,11 @@ class JaggedKeyValueSeriesTests(unittest.TestCase):
         index = [-5, -3, 0, 3, 5]
         self.s = JaggedKeyValueSeries(arr, index)
 
-    def test_to_fixed_depth(self):
+    def test_to_fixed_depth_reversed_True(self):
         """
         For presenting data as a market depth dataframe
         :return:
         """
-
-        # TODO: Finish this later
 
         columns = pd.MultiIndex.from_tuples(
             [
@@ -126,6 +124,42 @@ class JaggedKeyValueSeriesTests(unittest.TestCase):
         )
 
         result = self.s.to_fixed_depth(3, reverse=True)
+
+        pd.testing.assert_frame_equal(expected, result, check_dtype=False)
+
+    def test_to_fixed_depth_reversed_False(self):
+        """
+        For presenting data as a market depth dataframe
+        :return:
+        """
+
+        columns = pd.MultiIndex.from_tuples(
+            [
+                ('key', 0),
+                ('key', 1),
+                ('key', 2),
+                ('value', 0),
+                ('value', 1),
+                ('value', 2),
+                    ],
+            names=['type', 'level']
+        )
+        nan = np.nan
+        data = [
+            [10, 11, nan, 1, 2, nan],
+            [11, 12, 13,  3, 4, 5],
+            [12, 13, nan, 6, 7, nan],
+            [nan, nan, nan, nan, nan, nan],
+            [14, nan, nan, 8, nan, nan]
+        ]
+
+        expected = pd.DataFrame(
+            columns=columns,
+            data = data,
+            index = self.s.index
+        )
+
+        result = self.s.to_fixed_depth(3, reverse=False)
 
         pd.testing.assert_frame_equal(expected, result, check_dtype=False)
 
