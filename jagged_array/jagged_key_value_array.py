@@ -379,8 +379,9 @@ def is_date_type(x):
 def _to_fixed_depth(keys, values, bounds, depth, reverse):
 
     length = len(bounds)-1
-    new_keys = np.empty((length, depth), DEFAULT_DTYPE)
-    new_values = np.empty((length, depth), DEFAULT_DTYPE)
+
+    new_keys = np.empty((length, depth), keys.dtype)
+    new_values = np.empty((length, depth), values.dtype)
 
     new_keys[:] = np.nan
     new_values[:] = np.nan
